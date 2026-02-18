@@ -348,3 +348,4 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 **Desarrollado con ❤️ para la Policía Boliviana**
 
 © 2024 Departamento de Inteligencia Criminal D-2. Todos los derechos reservados.
+# sigepic2.0
