@@ -349,3 +349,4 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 
 © 2024 Departamento de Inteligencia Criminal D-2. Todos los derechos reservados.
 # sigepic2.0
+# sigepic2.0-
