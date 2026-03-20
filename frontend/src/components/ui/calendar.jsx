@@ -10,43 +10,43 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }) {
       showOutsideDays={showOutsideDays}
       className={cn('p-0', className)}
       classNames={{
-        months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
-        month: 'space-y-4 w-full',
+        months: 'flex flex-col space-y-4',
+        month: 'space-y-2 w-full',
         caption:
-          'flex justify-center pt-4 pb-4 relative items-center bg-gradient-to-r from-police-navy to-police-cyan rounded-t-lg',
-        caption_label: 'text-lg font-bold text-white',
+          'flex justify-center pt-4 pb-4 relative items-center bg-gradient-to-r from-police-navy to-police-cyan rounded-t-xl',
+        caption_label: 'text-base font-bold text-white capitalize',
         nav: 'space-x-1 flex items-center',
         nav_button: cn(
-          'h-9 w-9 bg-white/20 hover:bg-white/30 text-white border-0 p-0 opacity-90 hover:opacity-100 transition-all rounded-lg backdrop-blur-sm'
+          'h-8 w-8 bg-white/20 hover:bg-white/30 text-white border-0 p-0 opacity-90 hover:opacity-100 transition-all rounded-lg backdrop-blur-sm flex items-center justify-center'
         ),
         nav_button_previous: 'absolute left-3',
         nav_button_next: 'absolute right-3',
-        table: 'w-full border-collapse mt-4 px-4 pb-4',
-        head_row: 'flex w-full mb-2',
+        table: 'w-full border-collapse px-3 pb-3',
+        head_row: 'grid grid-cols-7 w-full mb-1',
         head_cell:
-          'text-slate-600 rounded-md flex-1 font-bold text-xs uppercase text-center py-2',
-        row: 'flex w-full mt-1',
-        cell: 'flex-1 text-center text-sm p-0.5 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
+          'text-slate-500 dark:text-slate-400 font-semibold text-[11px] uppercase text-center py-2',
+        row: 'grid grid-cols-7 w-full mt-0.5',
+        cell: 'text-center text-sm p-0.5 relative focus-within:relative focus-within:z-20',
         day: cn(
-          'h-11 w-full p-0 font-semibold text-slate-700 hover:bg-police-cyan/20 hover:text-police-navy transition-all rounded-lg aria-selected:opacity-100'
+          'h-9 w-full p-0 font-medium text-slate-700 dark:text-slate-200 hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 transition-all rounded-lg aria-selected:opacity-100 mx-auto flex items-center justify-center'
         ),
         day_range_end: 'day-range-end',
         day_selected:
-          'bg-gradient-to-br from-police-navy to-police-cyan text-white hover:from-police-navy-dark hover:to-police-cyan hover:text-white focus:from-police-navy focus:to-police-cyan focus:text-white font-bold shadow-md scale-105',
+          'bg-gradient-to-br from-police-navy to-police-cyan !text-white hover:from-police-navy hover:to-police-cyan font-bold shadow-md',
         day_today:
-          'bg-police-cyan/20 text-police-navy font-bold border-2 border-police-cyan ring-2 ring-police-cyan/30',
+          'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-bold ring-2 ring-blue-400 ring-offset-1',
         day_outside:
-          'day-outside text-slate-300 opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
+          'day-outside text-slate-300 dark:text-slate-600 opacity-50 aria-selected:opacity-30',
         day_disabled:
-          'text-slate-200 opacity-30 cursor-not-allowed hover:bg-transparent',
+          'text-slate-300 dark:text-slate-600 opacity-30 cursor-not-allowed hover:bg-transparent',
         day_range_middle:
           'aria-selected:bg-accent aria-selected:text-accent-foreground',
         day_hidden: 'invisible',
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-5 w-5" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-5 w-5" />,
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />

@@ -14,6 +14,7 @@ import {
   SortAsc,
   SortDesc,
   ChevronRight,
+  ClipboardList,
 } from 'lucide-react';
 import { personalService } from '../services/personal.service';
 import { Button } from '../components/ui/button';
@@ -157,6 +158,17 @@ const PersonalSearch = () => {
     } else {
       setSortField(field);
       setSortOrder('asc');
+    }
+  };
+
+  const handleEstadoChange = async (personalId, nuevoEstado) => {
+    try {
+      await personalService.actualizar(personalId, { estadoServicio: nuevoEstado });
+      setResultados(prev =>
+        prev.map(p => p.id === personalId ? { ...p, estadoServicio: nuevoEstado } : p)
+      );
+    } catch (err) {
+      alert('Error al actualizar el estado');
     }
   };
 
@@ -795,19 +807,27 @@ const PersonalSearch = () => {
                             )}
                           </td>
                           <td className="p-4 text-center">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                            <select
+                              value={personal.estadoServicio || ''}
+                              onChange={e => handleEstadoChange(personal.id, e.target.value)}
+                              onClick={e => e.stopPropagation()}
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                                 personal.estadoServicio === 'ACTIVO'
-                                  ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
-                                  : personal.estadoServicio === 'LICENCIA'
-                                  ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
-                                  : personal.estadoServicio === 'SUSPENSION'
-                                  ? 'bg-orange-100 text-orange-700 border border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                                  ? 'bg-green-100 text-green-700 border-green-200 focus:ring-green-400 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+                                  : personal.estadoServicio === 'RETIRADO'
+                                    ? 'bg-slate-100 text-slate-600 border-slate-300 focus:ring-slate-400 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600'
+                                    : personal.estadoServicio === 'LICENCIA'
+                                      ? 'bg-yellow-100 text-yellow-700 border-yellow-200 focus:ring-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
+                                      : personal.estadoServicio === 'ART'
+                                        ? 'bg-orange-100 text-orange-700 border-orange-200 focus:ring-orange-400 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'
+                                        : 'bg-slate-100 text-slate-600 border-slate-200'
                               }`}
                             >
-                              {personal.estadoServicio || 'N/D'}
-                            </span>
+                              <option value="ACTIVO">ACTIVO</option>
+                              <option value="RETIRADO">RETIRADO</option>
+                              <option value="LICENCIA">LICENCIA</option>
+                              <option value="ART">ART</option>
+                            </select>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center justify-center gap-2">
@@ -823,10 +843,7 @@ const PersonalSearch = () => {
                                       personal.archivosAdjuntos[
                                         personal.archivosAdjuntos.length - 1
                                       ];
-                                    window.open(
-                                      ultimoArchivo.url,
-                                      '_blank'
-                                    );
+                                    window.open(ultimoArchivo.url, '_blank');
                                   } else {
                                     alert(
                                       'Este personal no tiene archivos adjuntos.'
@@ -865,7 +882,8 @@ const PersonalSearch = () => {
                                       );
 
                                     const blob = await response.blob();
-                                    const url = window.URL.createObjectURL(blob);
+                                    const url =
+                                      window.URL.createObjectURL(blob);
                                     const a = document.createElement('a');
                                     a.href = url;
                                     a.download = `planilla-${personal.apellidos}-${personal.nombres}.pdf`;
@@ -885,6 +903,17 @@ const PersonalSearch = () => {
                                 title="Generar Planilla"
                               >
                                 <FileDown className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  navigate(`/personal/${personal.id}/licencias`)
+                                }
+                                className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:hover:text-purple-400"
+                                title="Licencias"
+                              >
+                                <ClipboardList className="w-4 h-4" />
                               </Button>
                             </div>
                           </td>

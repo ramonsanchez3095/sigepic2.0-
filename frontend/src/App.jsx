@@ -8,6 +8,7 @@ import PersonalNew from './pages/PersonalNew';
 import PersonalSearch from './pages/PersonalSearch';
 import PersonalEdit from './pages/PersonalEdit';
 import PersonalDetail from './pages/PersonalDetail';
+import PersonalLicencias from './pages/PersonalLicencias';
 import './styles/index.css';
 
 import { ThemeProvider } from './context/ThemeContext';
@@ -70,6 +71,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PersonalEdit />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/personal/:id/licencias"
+              element={
+                <ProtectedRoute>
+                  <PersonalLicencias />
                 </ProtectedRoute>
               }
             />

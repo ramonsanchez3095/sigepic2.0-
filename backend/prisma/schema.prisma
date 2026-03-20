@@ -83,6 +83,7 @@ model Personal {
   archivosAdjuntos        Json           @default("[]") @map("archivos_adjuntos")
   contactosAdicionales    Json           @default("[]") @map("contactos_adicionales")
   observaciones           String?
+  diasLicenciaAnuales     Int?           @default(15) @map("dias_licencia_anuales")
   createdAt               DateTime       @default(now()) @map("created_at")
   updatedAt               DateTime       @updatedAt @map("updated_at")
   createdBy               Int?           @map("created_by")
@@ -174,23 +175,26 @@ model Sesion {
 }
 
 model Licencia {
-  id            Int      @id @default(autoincrement())
-  personalId    Int      @map("personal_id")
-  tipo          String   @db.VarChar(50)
-  fechaInicio   DateTime @map("fecha_inicio") @db.Date
-  fechaFin      DateTime @map("fecha_fin") @db.Date
-  dias          Int
-  motivo        String?
-  documentoUrl  String?  @map("documento_url") @db.VarChar(255)
-  estado        String   @default("APROBADA") @db.VarChar(20)
-  observaciones String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  personal      Personal @relation(fields: [personalId], references: [id], onDelete: Cascade)
+  id             Int      @id @default(autoincrement())
+  personalId     Int      @map("personal_id")
+  tipo           String   @db.VarChar(50)
+  fechaInicio    DateTime @map("fecha_inicio") @db.Date
+  fechaFin       DateTime @map("fecha_fin") @db.Date
+  dias           Int
+  anioLicencia   Int      @map("anio_licencia")
+  diasRestantes  Int      @default(0) @map("dias_restantes")
+  motivo         String?
+  documentoUrl   String?  @map("documento_url") @db.VarChar(255)
+  estado         String   @default("APROBADA") @db.VarChar(20)
+  observaciones  String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  personal       Personal @relation(fields: [personalId], references: [id], onDelete: Cascade)
 
   @@index([personalId])
   @@index([fechaInicio])
   @@index([estado])
+  @@index([anioLicencia])
   @@map("licencias")
 }
 

@@ -47,6 +47,7 @@ const personalSchema = z.object({
   dni: z.string().min(4, 'DNI/CI requerido'),
   cuil: z.string().optional(),
   subsidioSalud: z.string().optional(),
+  diasLicenciaAnuales: z.coerce.number().int().min(0).optional(),
   fechaNacimiento: z.string().min(1, 'Fecha de nacimiento requerida'),
   prontuario: z.string().optional(),
   estadoCivil: z
@@ -142,7 +143,6 @@ const PersonalEdit = () => {
 
   const tipoPersonal = watch('tipoPersonal');
 
-
   // Cargar datos del personal
   useEffect(() => {
     fetchData();
@@ -197,25 +197,31 @@ const PersonalEdit = () => {
       // Actualizar estados
       setPoseeCarnet(personal.poseeCarnetManejo || false);
       setPoseeChalecoState(personal.poseeChalecoAsignado || false);
-      
+
       // Cargar foto si existe
       if (personal.fotoUrl) {
         setFotoPreview(personal.fotoUrl);
       }
 
       // Cargar archivos existentes
-      if (personal.archivosAdjuntos && Array.isArray(personal.archivosAdjuntos)) {
+      if (
+        personal.archivosAdjuntos &&
+        Array.isArray(personal.archivosAdjuntos)
+      ) {
         setExistingFiles(personal.archivosAdjuntos);
       }
 
       // Cargar contactos adicionales existentes
-      if (personal.contactosAdicionales && Array.isArray(personal.contactosAdicionales)) {
+      if (
+        personal.contactosAdicionales &&
+        Array.isArray(personal.contactosAdicionales)
+      ) {
         setContactosAdicionales(personal.contactosAdicionales);
       }
-      
+
       // Cargar observaciones
       if (personal.observaciones) {
-        reset((formValues) => ({
+        reset(formValues => ({
           ...formValues,
           observaciones: personal.observaciones,
         }));
@@ -227,7 +233,6 @@ const PersonalEdit = () => {
       setLoading(false);
     }
   };
-
 
   // Dropzone para foto
   const { getRootProps: getFotoRootProps, getInputProps: getFotoInputProps } =
@@ -301,9 +306,14 @@ const PersonalEdit = () => {
 
       // Agregar contactos adicionales
       if (contactosAdicionales.length > 0) {
-        const contactosValidos = contactosAdicionales.filter(c => c.valor.trim() !== '');
+        const contactosValidos = contactosAdicionales.filter(
+          c => c.valor.trim() !== ''
+        );
         if (contactosValidos.length > 0) {
-          formData.append('contactosAdicionales', JSON.stringify(contactosValidos));
+          formData.append(
+            'contactosAdicionales',
+            JSON.stringify(contactosValidos)
+          );
         }
       }
 
@@ -390,8 +400,7 @@ const PersonalEdit = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                Actualice la información del
-                personal del Departamento D-2
+                Actualice la información del personal del Departamento D-2
               </motion.p>
             </div>
 
@@ -842,6 +851,19 @@ const PersonalEdit = () => {
                   <Label htmlFor="subsidioSalud">Subsidio de Salud</Label>
                   <Input id="subsidioSalud" {...register('subsidioSalud')} />
                 </div>
+
+                <div>
+                  <Label htmlFor="diasLicenciaAnuales">
+                    Días de Licencia Anuales
+                  </Label>
+                  <Input
+                    id="diasLicenciaAnuales"
+                    type="number"
+                    min="0"
+                    {...register('diasLicenciaAnuales')}
+                    placeholder="Ej: 15"
+                  />
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -869,7 +891,12 @@ const PersonalEdit = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setContactosAdicionales([...contactosAdicionales, { tipo: 'celular', valor: '' }])}
+                    onClick={() =>
+                      setContactosAdicionales([
+                        ...contactosAdicionales,
+                        { tipo: 'celular', valor: '' },
+                      ])
+                    }
                     className="hover:bg-police-cyan/10 hover:border-police-cyan hover:text-police-cyan dark:hover:bg-police-cyan/20"
                   >
                     <Plus className="w-4 h-4 mr-1" />
@@ -921,7 +948,7 @@ const PersonalEdit = () => {
                       >
                         <select
                           value={contacto.tipo}
-                          onChange={(e) => {
+                          onChange={e => {
                             const nuevosContactos = [...contactosAdicionales];
                             nuevosContactos[index].tipo = e.target.value;
                             setContactosAdicionales(nuevosContactos);
@@ -935,12 +962,16 @@ const PersonalEdit = () => {
                         </select>
                         <Input
                           value={contacto.valor}
-                          onChange={(e) => {
+                          onChange={e => {
                             const nuevosContactos = [...contactosAdicionales];
                             nuevosContactos[index].valor = e.target.value;
                             setContactosAdicionales(nuevosContactos);
                           }}
-                          placeholder={contacto.tipo === 'email' ? 'correo@ejemplo.com' : 'Número de teléfono'}
+                          placeholder={
+                            contacto.tipo === 'email'
+                              ? 'correo@ejemplo.com'
+                              : 'Número de teléfono'
+                          }
                           className="flex-1"
                         />
                         <Button
@@ -948,7 +979,9 @@ const PersonalEdit = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => {
-                            setContactosAdicionales(contactosAdicionales.filter((_, i) => i !== index));
+                            setContactosAdicionales(
+                              contactosAdicionales.filter((_, i) => i !== index)
+                            );
                           }}
                           className="hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                         >
@@ -1238,16 +1271,17 @@ const PersonalEdit = () => {
                             <FileText className="w-5 h-5 text-police-navy" />
                           </div>
                           <div>
-                            <a 
-                              href={archivo.url} 
-                              target="_blank" 
+                            <a
+                              href={archivo.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-blue-600 hover:underline"
                             >
                               {archivo.nombre}
                             </a>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {(archivo.tamano / 1024).toFixed(1)} KB • {new Date(archivo.fecha).toLocaleDateString()}
+                              {(archivo.tamano / 1024).toFixed(1)} KB •{' '}
+                              {new Date(archivo.fecha).toLocaleDateString()}
                             </p>
                           </div>
                         </div>

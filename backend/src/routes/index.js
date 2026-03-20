@@ -7,11 +7,13 @@ const jerarquiaRoutes = require('./jerarquia.routes');
 const seccionRoutes = require('./seccion.routes');
 const auditoriaRoutes = require('./auditoria.routes');
 const usuarioRoutes = require('./usuario.routes');
+const licenciaRoutes = require('./licencia.routes');
 
 // Rutas públicas
 router.use('/auth', authRoutes);
 
 // Rutas protegidas (requieren autenticación)
+router.use('/personal/:personalId/licencias', licenciaRoutes);
 router.use('/personal', personalRoutes);
 router.use('/jerarquias', jerarquiaRoutes);
 router.use('/secciones', seccionRoutes);

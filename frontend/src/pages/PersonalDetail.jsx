@@ -9,6 +9,7 @@ import {
   Mail,
   MapPin,
   Calendar,
+  ClipboardList,
 } from 'lucide-react';
 import { personalService } from '../services/personal.service';
 import { Button } from '../components/ui/button';
@@ -131,6 +132,15 @@ const PersonalDetail = () => {
           </div>
 
           <div className="flex gap-2">
+            {hasPermission('read') && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/personal/${id}/licencias`)}
+              >
+                <ClipboardList className="w-4 h-4 mr-2" />
+                Licencias
+              </Button>
+            )}
             {hasPermission('personal', 'actualizar') && (
               <Button onClick={() => navigate(`/personal/editar/${id}`)}>
                 <Edit className="w-4 h-4 mr-2" />
@@ -340,7 +350,9 @@ const PersonalDetail = () => {
 // Componente auxiliar para mostrar información
 const InfoRow = ({ label, value }) => (
   <div className="flex justify-between py-1 border-b border-gray-100 dark:border-slate-800">
-    <span className="font-medium text-gray-600 dark:text-slate-400">{label}:</span>
+    <span className="font-medium text-gray-600 dark:text-slate-400">
+      {label}:
+    </span>
     <span className="text-gray-900 dark:text-slate-100">{value}</span>
   </div>
 );
