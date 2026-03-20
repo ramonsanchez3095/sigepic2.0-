@@ -434,6 +434,7 @@ const PersonalSearch = () => {
                     >
                       <option value="">Todos</option>
                       <option value="ACTIVO">Activo</option>
+                      <option value="INACTIVO">Inactivo</option>
                       <option value="LICENCIA">Licencia</option>
                       <option value="SUSPENSION">Suspensión</option>
                       <option value="RETIRADO">Retirado</option>
@@ -814,19 +815,25 @@ const PersonalSearch = () => {
                               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                                 personal.estadoServicio === 'ACTIVO'
                                   ? 'bg-green-100 text-green-700 border-green-200 focus:ring-green-400 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
-                                  : personal.estadoServicio === 'RETIRADO'
-                                    ? 'bg-slate-100 text-slate-600 border-slate-300 focus:ring-slate-400 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600'
+                                  : personal.estadoServicio === 'INACTIVO'
+                                    ? 'bg-amber-100 text-amber-700 border-amber-200 focus:ring-amber-400 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800'
                                     : personal.estadoServicio === 'LICENCIA'
                                       ? 'bg-yellow-100 text-yellow-700 border-yellow-200 focus:ring-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
-                                      : personal.estadoServicio === 'ART'
+                                      : personal.estadoServicio === 'SUSPENSION'
                                         ? 'bg-orange-100 text-orange-700 border-orange-200 focus:ring-orange-400 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'
-                                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                                        : personal.estadoServicio === 'RETIRADO'
+                                          ? 'bg-slate-100 text-slate-600 border-slate-300 focus:ring-slate-400 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600'
+                                          : personal.estadoServicio === 'BAJA'
+                                            ? 'bg-red-100 text-red-700 border-red-200 focus:ring-red-400 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+                                            : 'bg-slate-100 text-slate-600 border-slate-200'
                               }`}
                             >
                               <option value="ACTIVO">ACTIVO</option>
-                              <option value="RETIRADO">RETIRADO</option>
+                              <option value="INACTIVO">INACTIVO</option>
                               <option value="LICENCIA">LICENCIA</option>
-                              <option value="ART">ART</option>
+                              <option value="SUSPENSION">SUSPENSIÓN</option>
+                              <option value="RETIRADO">RETIRADO</option>
+                              <option value="BAJA">BAJA</option>
                             </select>
                           </td>
                           <td className="p-4">
