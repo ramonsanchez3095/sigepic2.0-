@@ -308,10 +308,11 @@ export default function PersonalList() {
                       >
                         <option value="">Seleccionar estado</option>
                         <SelectItem value="ACTIVO">Activo</SelectItem>
-                        <SelectItem value="RETIRO">Retiro</SelectItem>
+                        <SelectItem value="INACTIVO">Inactivo</SelectItem>
                         <SelectItem value="LICENCIA">Licencia</SelectItem>
+                        <SelectItem value="SUSPENSION">Suspensión</SelectItem>
+                        <SelectItem value="RETIRADO">Retirado</SelectItem>
                         <SelectItem value="BAJA">Baja</SelectItem>
-                        <SelectItem value="DISPONIBILIDAD">Disponibilidad</SelectItem>
                       </Select>
                     </div>
                   </div>
@@ -424,10 +425,11 @@ export default function PersonalList() {
                             }`}
                           >
                             <SelectItem value="ACTIVO">ACTIVO</SelectItem>
-                            <SelectItem value="RETIRO">RETIRO</SelectItem>
+                            <SelectItem value="INACTIVO">INACTIVO</SelectItem>
                             <SelectItem value="LICENCIA">LICENCIA</SelectItem>
+                            <SelectItem value="SUSPENSION">SUSPENSIÓN</SelectItem>
+                            <SelectItem value="RETIRADO">RETIRADO</SelectItem>
                             <SelectItem value="BAJA">BAJA</SelectItem>
-                            <SelectItem value="DISPONIBILIDAD">DISPONIBILIDAD</SelectItem>
                           </Select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium sticky right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm shadow-l">

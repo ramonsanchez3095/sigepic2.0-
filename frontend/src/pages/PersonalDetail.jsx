@@ -82,6 +82,8 @@ const PersonalDetail = () => {
       INACTIVO: 'warning',
       BAJA: 'danger',
       LICENCIA: 'info',
+      SUSPENSION: 'warning',
+      RETIRADO: 'default',
     };
     return <Badge variant={variants[estado] || 'default'}>{estado}</Badge>;
   };
