@@ -3,7 +3,7 @@ import * as licenciaService from './licencia.service';
 import type { AuthenticatedRequest } from '../../types';
 
 function getSingleParam(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] : value ?? '';
+  return Array.isArray(value) ? value[0] : (value ?? '');
 }
 
 export const listar = async (

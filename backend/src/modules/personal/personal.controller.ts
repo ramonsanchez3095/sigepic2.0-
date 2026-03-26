@@ -3,7 +3,7 @@ import * as personalService from './personal.service';
 import type { AuthenticatedRequest, PersonalSearchParams } from '../../types';
 
 function getSingleParam(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] : value ?? '';
+  return Array.isArray(value) ? value[0] : (value ?? '');
 }
 
 export const buscar = async (

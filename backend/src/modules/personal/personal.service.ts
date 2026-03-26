@@ -460,12 +460,16 @@ function buildPersonalCreateData(
     armaTipo: toOptionalString(processed.armaTipo),
     nroArma: toOptionalString(processed.nroArma),
     poseeChalecoAsignado: toOptionalBoolean(processed.poseeChalecoAsignado),
-    nroSerieChalecoAsignado: toOptionalString(processed.nroSerieChalecoAsignado),
+    nroSerieChalecoAsignado: toOptionalString(
+      processed.nroSerieChalecoAsignado
+    ),
     poseeCarnetManejo: toOptionalBoolean(processed.poseeCarnetManejo),
     conduceAutos: toOptionalBoolean(processed.conduceAutos),
     conduceMotos: toOptionalBoolean(processed.conduceMotos),
     conduceOtros: toOptionalBoolean(processed.conduceOtros),
-    poseeCredencialPolicial: toOptionalBoolean(processed.poseeCredencialPolicial),
+    poseeCredencialPolicial: toOptionalBoolean(
+      processed.poseeCredencialPolicial
+    ),
     fotoUrl: toOptionalString(processed.fotoUrl),
     archivosAdjuntos: toJsonValue(processed.archivosAdjuntos),
     contactosAdicionales: toJsonValue(processed.contactosAdicionales),
