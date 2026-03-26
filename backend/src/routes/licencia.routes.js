@@ -10,6 +10,7 @@ const {
   schemaLicencia,
   schemaLicenciaActualizar,
 } = require('../utils/validators');
+const { createLimiter } = require('../middlewares/rateLimiter');
 
 // Todas las rutas requieren autenticación
 router.use(verificarToken);
@@ -39,6 +40,7 @@ router.get(
 router.post(
   '/',
   verificarPermiso('licencia', 'create'),
+  createLimiter,
   validarDatos(schemaLicencia),
   licenciaController.crear
 );
@@ -47,6 +49,7 @@ router.post(
 router.put(
   '/:id',
   verificarPermiso('licencia', 'update'),
+  createLimiter,
   validarDatos(schemaLicenciaActualizar),
   licenciaController.actualizar
 );
@@ -55,6 +58,7 @@ router.put(
 router.delete(
   '/:id',
   verificarPermiso('licencia', 'delete'),
+  createLimiter,
   licenciaController.eliminar
 );
 

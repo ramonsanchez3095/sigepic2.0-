@@ -1,61 +1,62 @@
-const express = require('express');
-const router = express.Router();
-const personalController = require('../controllers/personalController');
-const {
+import { Router } from 'express';
+import * as personalController from './personal.controller';
+import {
   verificarToken,
   verificarPermiso,
-} = require('../middlewares/authMiddleware');
-const { validarDatos } = require('../middlewares/validator');
-const {
+} from '../../shared/middleware/auth.middleware';
+import { validarDatos } from '../../shared/middleware/validator';
+import {
   schemaPersonal,
   schemaPersonalActualizar,
-} = require('../utils/validators');
-const {
+} from './personal.validators';
+import {
   uploadFoto,
   uploadArchivos,
   uploadPersonalCompleto,
-} = require('../middlewares/uploadMiddleware');
-const { createLimiter } = require('../middlewares/rateLimiter');
+} from '../../shared/middleware/upload.middleware';
+import { createLimiter } from '../../shared/middleware/rate-limiter';
 
-// Todas las rutas requieren autenticación
+const router = Router();
+
+// All routes require authentication
 router.use(verificarToken);
 
-// GET /api/personal - Buscar/Listar personal
+// GET /api/v1/personal - Search/List
 router.get(
   '/',
   verificarPermiso('personal', 'read'),
   personalController.buscar
 );
 
-// GET /api/personal/estadisticas
+// GET /api/v1/personal/estadisticas
 router.get(
   '/estadisticas',
   verificarPermiso('personal', 'read'),
   personalController.estadisticas
 );
 
-// GET /api/personal/exportar - Exportar personal
+// GET /api/v1/personal/exportar
 router.get(
   '/exportar',
   verificarPermiso('personal', 'read'),
   personalController.exportar
 );
 
-// POST /api/personal/planillas - Generar planillas PDF
+// POST /api/v1/personal/planillas
 router.post(
   '/planillas',
   verificarPermiso('personal', 'read'),
   personalController.generarPlanillas
 );
 
-// GET /api/personal/:id - Obtener por ID
+// GET /api/v1/personal/:id
 router.get(
   '/:id',
   verificarPermiso('personal', 'read'),
   personalController.obtenerPorId
 );
 
-// POST /api/personal - Crear nuevo
+// POST /api/v1/personal - Create (with rate limiting)
 router.post(
   '/',
   verificarPermiso('personal', 'create'),
@@ -64,7 +65,7 @@ router.post(
   personalController.crear
 );
 
-// PUT /api/personal/:id - Actualizar
+// PUT /api/v1/personal/:id - Update (with rate limiting)
 router.put(
   '/:id',
   verificarPermiso('personal', 'update'),
@@ -73,15 +74,14 @@ router.put(
   personalController.actualizar
 );
 
-// DELETE /api/personal/:id - Eliminar
+// DELETE /api/v1/personal/:id
 router.delete(
   '/:id',
   verificarPermiso('personal', 'delete'),
-  createLimiter,
   personalController.eliminar
 );
 
-// POST /api/personal/:id/foto - Subir foto
+// POST /api/v1/personal/:id/foto
 router.post(
   '/:id/foto',
   verificarPermiso('personal', 'update'),
@@ -89,7 +89,7 @@ router.post(
   personalController.subirFoto
 );
 
-// POST /api/personal/:id/archivos - Subir archivos
+// POST /api/v1/personal/:id/archivos
 router.post(
   '/:id/archivos',
   verificarPermiso('personal', 'update'),
@@ -97,11 +97,11 @@ router.post(
   personalController.subirArchivos
 );
 
-// GET /api/personal/:id/historial - Historial de cambios
+// GET /api/v1/personal/:id/historial
 router.get(
   '/:id/historial',
   verificarPermiso('auditoria', 'read'),
   personalController.obtenerHistorial
 );
 
-module.exports = router;
+export default router;

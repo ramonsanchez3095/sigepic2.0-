@@ -1,10 +1,21 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || 'default-refresh-secret';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `Variable de entorno requerida ${name} no está configurada. ` +
+        `Configúrela antes de iniciar el servidor.`
+    );
+  }
+  return value;
+}
+
+// SECURITY FIX: No default secret keys - must be set via environment variables
+const JWT_SECRET = requireEnv('JWT_SECRET');
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+const JWT_REFRESH_SECRET = requireEnv('JWT_REFRESH_SECRET');
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 const generateToken = payload => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

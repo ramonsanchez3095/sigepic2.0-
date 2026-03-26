@@ -33,9 +33,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res
-    .status(200)
-    .json({ status: 'healthy', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
 });
 
 // Logging HTTP
@@ -59,18 +61,18 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // RUTAS
 // ===========================================
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV,
-  });
-});
-
-// API Routes
+// API Routes - Legacy (non-versioned)
 app.use('/api', routes);
+
+// API Routes - New versioned modules (v1)
+// These will progressively replace the legacy routes above
+try {
+  const v1Router = require('./shared/router').default;
+  app.use('/api/v1', v1Router);
+} catch (e) {
+  // TS modules not compiled yet - skip in JS-only mode
+  logger.info('Módulos v1 TypeScript aún no compilados, usando rutas legacy');
+}
 
 // 404 Handler
 app.use((req, res) => {
