@@ -150,7 +150,9 @@ const PersonalLicencias = () => {
     if (isNaN(valor) || valor < 0) return;
     try {
       setSavingDias(true);
-      await personalService.actualizar(personalId, { diasLicenciaAnuales: valor });
+      await personalService.actualizar(personalId, {
+        diasLicenciaAnuales: valor,
+      });
       setEditingDias(false);
       await fetchData();
       setSuccess('Días anuales actualizados correctamente');
@@ -369,7 +371,9 @@ const PersonalLicencias = () => {
   const usagePercent = resumen
     ? Math.min(
         100,
-        Math.round((resumen.diasUsados / (resumen.diasLicenciaAnuales || 1)) * 100)
+        Math.round(
+          (resumen.diasUsados / (resumen.diasLicenciaAnuales || 1)) * 100
+        )
       )
     : 0;
 
@@ -429,7 +433,6 @@ const PersonalLicencias = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-
         {/* Mensajes */}
         {error && (
           <motion.div
@@ -473,9 +476,7 @@ const PersonalLicencias = () => {
                     <Calendar className="w-5 h-5 text-blue-600" />
                     Resumen Anual
                   </CardTitle>
-                  <CardDescription>
-                    Balance de días de licencia
-                  </CardDescription>
+                  <CardDescription>Balance de días de licencia</CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
                   <Select
@@ -499,13 +500,18 @@ const PersonalLicencias = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500 dark:text-slate-400">
-                        {resumen.diasUsados} de {resumen.diasLicenciaAnuales ?? 0} días utilizados
+                        {resumen.diasUsados} de{' '}
+                        {resumen.diasLicenciaAnuales ?? 0} días utilizados
                       </span>
-                      <span className={`font-semibold ${
-                        usagePercent > 90 ? 'text-red-600 dark:text-red-400' :
-                        usagePercent > 70 ? 'text-amber-600 dark:text-amber-400' :
-                        'text-blue-600 dark:text-blue-400'
-                      }`}>
+                      <span
+                        className={`font-semibold ${
+                          usagePercent > 90
+                            ? 'text-red-600 dark:text-red-400'
+                            : usagePercent > 70
+                              ? 'text-amber-600 dark:text-amber-400'
+                              : 'text-blue-600 dark:text-blue-400'
+                        }`}
+                      >
                         {usagePercent}%
                       </span>
                     </div>
@@ -537,7 +543,9 @@ const PersonalLicencias = () => {
                           <button
                             type="button"
                             onClick={() => {
-                              setDiasInput(String(resumen.diasLicenciaAnuales ?? ''));
+                              setDiasInput(
+                                String(resumen.diasLicenciaAnuales ?? '')
+                              );
                               setEditingDias(true);
                             }}
                             className="opacity-0 group-hover:opacity-100 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all duration-200"
@@ -608,11 +616,13 @@ const PersonalLicencias = () => {
                           : 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 border-red-100 dark:border-red-800/50 hover:border-red-200 dark:hover:border-red-700'
                       }`}
                     >
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center mb-3 ${
-                        resumen.diasRestantes >= 0
-                          ? 'bg-emerald-500/10 dark:bg-emerald-500/20'
-                          : 'bg-red-500/10 dark:bg-red-500/20'
-                      }`}>
+                      <div
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center mb-3 ${
+                          resumen.diasRestantes >= 0
+                            ? 'bg-emerald-500/10 dark:bg-emerald-500/20'
+                            : 'bg-red-500/10 dark:bg-red-500/20'
+                        }`}
+                      >
                         {resumen.diasRestantes >= 0 ? (
                           <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                         ) : (
@@ -667,12 +677,17 @@ const PersonalLicencias = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                    {editingId ? <Edit className="w-4 h-4 text-blue-600" /> : <Plus className="w-4 h-4 text-blue-600" />}
+                    {editingId ? (
+                      <Edit className="w-4 h-4 text-blue-600" />
+                    ) : (
+                      <Plus className="w-4 h-4 text-blue-600" />
+                    )}
                   </div>
                   {editingId ? 'Editar Licencia' : 'Nueva Licencia'}
                 </CardTitle>
                 <CardDescription>
-                  Complete los campos requeridos para {editingId ? 'actualizar' : 'registrar'} la licencia
+                  Complete los campos requeridos para{' '}
+                  {editingId ? 'actualizar' : 'registrar'} la licencia
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -882,7 +897,12 @@ const PersonalLicencias = () => {
 
                   {/* Botones */}
                   <div className="flex justify-end gap-3 pt-5 border-t border-slate-200 dark:border-slate-700">
-                    <Button type="button" variant="outline" onClick={resetForm} className="min-w-[100px]">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={resetForm}
+                      className="min-w-[100px]"
+                    >
                       Cancelar
                     </Button>
                     <Button
@@ -934,7 +954,8 @@ const PersonalLicencias = () => {
                 </div>
                 {licencias.length > 0 && (
                   <span className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
-                    {licencias.length} registro{licencias.length !== 1 ? 's' : ''}
+                    {licencias.length} registro
+                    {licencias.length !== 1 ? 's' : ''}
                   </span>
                 )}
               </div>
@@ -972,13 +993,26 @@ const PersonalLicencias = () => {
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-slate-50/80 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
-                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Tipo</TableHead>
-                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Período</TableHead>
-                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Días</TableHead>
-                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Restantes</TableHead>
-                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Estado</TableHead>
-                          {(hasPermission('update') || hasPermission('delete')) && (
-                            <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right pr-6">Acciones</TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Tipo
+                          </TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Período
+                          </TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
+                            Días
+                          </TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
+                            Restantes
+                          </TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
+                            Estado
+                          </TableHead>
+                          {(hasPermission('update') ||
+                            hasPermission('delete')) && (
+                            <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right pr-6">
+                              Acciones
+                            </TableHead>
                           )}
                         </TableRow>
                       </TableHeader>
@@ -1001,7 +1035,8 @@ const PersonalLicencias = () => {
                             <TableCell className="py-3.5">
                               <div className="flex flex-col">
                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                  {formatDate(licencia.fechaInicio)} → {formatDate(licencia.fechaFin)}
+                                  {formatDate(licencia.fechaInicio)} →{' '}
+                                  {formatDate(licencia.fechaFin)}
                                 </span>
                                 <span className="text-xs text-slate-400 dark:text-slate-500">
                                   Año {licencia.anioLicencia}
@@ -1037,7 +1072,8 @@ const PersonalLicencias = () => {
                                 {licencia.estado}
                               </Badge>
                             </TableCell>
-                            {(hasPermission('update') || hasPermission('delete')) && (
+                            {(hasPermission('update') ||
+                              hasPermission('delete')) && (
                               <TableCell className="text-right pr-4 py-3.5">
                                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                                   {hasPermission('update') && (
@@ -1104,25 +1140,39 @@ const PersonalLicencias = () => {
                         </div>
                         <div className="grid grid-cols-3 gap-3 text-sm mb-3">
                           <div>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Período</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">
+                              Período
+                            </p>
                             <p className="font-medium text-slate-700 dark:text-slate-300 text-xs">
-                              {formatDate(licencia.fechaInicio)} — {formatDate(licencia.fechaFin)}
+                              {formatDate(licencia.fechaInicio)} —{' '}
+                              {formatDate(licencia.fechaFin)}
                             </p>
                           </div>
                           <div className="text-center">
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Días</p>
-                            <p className="font-bold text-slate-900 dark:text-slate-100">{licencia.dias}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">
+                              Días
+                            </p>
+                            <p className="font-bold text-slate-900 dark:text-slate-100">
+                              {licencia.dias}
+                            </p>
                           </div>
                           <div className="text-center">
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Restantes</p>
-                            <p className={`font-bold ${
-                              licencia.diasRestantes >= 0
-                                ? 'text-emerald-600 dark:text-emerald-400'
-                                : 'text-red-600 dark:text-red-400'
-                            }`}>{licencia.diasRestantes}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">
+                              Restantes
+                            </p>
+                            <p
+                              className={`font-bold ${
+                                licencia.diasRestantes >= 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}
+                            >
+                              {licencia.diasRestantes}
+                            </p>
                           </div>
                         </div>
-                        {(hasPermission('update') || hasPermission('delete')) && (
+                        {(hasPermission('update') ||
+                          hasPermission('delete')) && (
                           <div className="flex items-center justify-end gap-1 pt-2 border-t border-slate-100 dark:border-slate-800">
                             {hasPermission('update') && (
                               <Button
@@ -1144,7 +1194,8 @@ const PersonalLicencias = () => {
                                 }}
                                 className="h-8 text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
                               >
-                                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Eliminar
+                                <Trash2 className="w-3.5 h-3.5 mr-1.5" />{' '}
+                                Eliminar
                               </Button>
                             )}
                           </div>
@@ -1165,7 +1216,9 @@ const PersonalLicencias = () => {
               <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                 <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <DialogTitle className="text-center">Eliminar Licencia</DialogTitle>
+              <DialogTitle className="text-center">
+                Eliminar Licencia
+              </DialogTitle>
               <DialogDescription className="text-center">
                 Esta acción no se puede deshacer. La licencia será eliminada
                 permanentemente del registro.

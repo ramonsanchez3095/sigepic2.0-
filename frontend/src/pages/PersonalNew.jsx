@@ -216,9 +216,14 @@ const PersonalNew = () => {
 
       // Agregar contactos adicionales
       if (contactosAdicionales.length > 0) {
-        const contactosValidos = contactosAdicionales.filter(c => c.valor.trim() !== '');
+        const contactosValidos = contactosAdicionales.filter(
+          c => c.valor.trim() !== ''
+        );
         if (contactosValidos.length > 0) {
-          formData.append('contactosAdicionales', JSON.stringify(contactosValidos));
+          formData.append(
+            'contactosAdicionales',
+            JSON.stringify(contactosValidos)
+          );
         }
       }
 
@@ -279,13 +284,18 @@ const PersonalNew = () => {
   }, []);
 
   const scrollToSection = id => {
-    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    sectionRefs.current[id]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
   };
 
   // Helper para select styling
-  const selectClass = (hasError) =>
+  const selectClass = hasError =>
     `w-full h-10 px-3 py-2 rounded-md border text-sm bg-background ring-offset-background focus:outline-none focus:ring-2 focus:ring-police-cyan/40 focus:border-police-cyan transition-colors ${
-      hasError ? 'border-red-400 focus:ring-red-400/40' : 'border-input hover:border-slate-400'
+      hasError
+        ? 'border-red-400 focus:ring-red-400/40'
+        : 'border-input hover:border-slate-400'
     }`;
 
   return (
@@ -314,7 +324,9 @@ const PersonalNew = () => {
                   <h1 className="text-base font-bold text-slate-900 dark:text-white leading-none">
                     Agregar Personal
                   </h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Departamento D-2</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Departamento D-2
+                  </p>
                 </div>
               </div>
             </div>
@@ -363,10 +375,18 @@ const PersonalNew = () => {
             >
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-semibold text-red-700 dark:text-red-400">Error al registrar</p>
-                <p className="text-sm text-red-600 dark:text-red-400/80 mt-0.5">{error}</p>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+                  Error al registrar
+                </p>
+                <p className="text-sm text-red-600 dark:text-red-400/80 mt-0.5">
+                  {error}
+                </p>
               </div>
-              <button type="button" onClick={() => setError('')} className="ml-auto text-red-400 hover:text-red-600">
+              <button
+                type="button"
+                onClick={() => setError('')}
+                className="ml-auto text-red-400 hover:text-red-600"
+              >
                 <X className="w-4 h-4" />
               </button>
             </motion.div>
@@ -374,7 +394,6 @@ const PersonalNew = () => {
         </AnimatePresence>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
           {/* ═══ 1. Fotografía ═══ */}
           <div ref={el => (sectionRefs.current.foto = el)} data-section="foto">
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
@@ -385,7 +404,9 @@ const PersonalNew = () => {
                   </div>
                   <div>
                     <CardTitle className="text-base">Fotografía</CardTitle>
-                    <CardDescription className="text-xs">Foto del personal (opcional)</CardDescription>
+                    <CardDescription className="text-xs">
+                      Foto del personal (opcional)
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -395,7 +416,11 @@ const PersonalNew = () => {
                   <div className="relative flex-shrink-0">
                     <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 border-2 border-white dark:border-slate-600 shadow-lg overflow-hidden flex items-center justify-center">
                       {fotoPreview ? (
-                        <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
+                        <img
+                          src={fotoPreview}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <User className="w-12 h-12 text-slate-300 dark:text-slate-500" />
                       )}
@@ -403,7 +428,10 @@ const PersonalNew = () => {
                     {foto && (
                       <button
                         type="button"
-                        onClick={() => { setFoto(null); setFotoPreview(null); }}
+                        onClick={() => {
+                          setFoto(null);
+                          setFotoPreview(null);
+                        }}
                         className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
                       >
                         <X className="w-3 h-3" />
@@ -422,12 +450,16 @@ const PersonalNew = () => {
                       <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                         Click o arrastre una foto
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">PNG, JPG — Máx 5MB</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        PNG, JPG — Máx 5MB
+                      </p>
                     </div>
                     {foto && (
                       <div className="mt-2 flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                         <Check className="w-3.5 h-3.5" />
-                        <span className="font-medium truncate">{foto.name}</span>
+                        <span className="font-medium truncate">
+                          {foto.name}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -437,7 +469,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 2. Datos Personales ═══ */}
-          <div ref={el => (sectionRefs.current.personal = el)} data-section="personal">
+          <div
+            ref={el => (sectionRefs.current.personal = el)}
+            data-section="personal"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -445,8 +480,12 @@ const PersonalNew = () => {
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">Datos Personales</CardTitle>
-                    <CardDescription className="text-xs">Información personal básica del efectivo</CardDescription>
+                    <CardTitle className="text-base">
+                      Datos Personales
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Información personal básica del efectivo
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -454,57 +493,117 @@ const PersonalNew = () => {
                 {/* Row: Apellidos, Nombres, DNI */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="apellidos" className="text-xs font-semibold">
+                    <Label
+                      htmlFor="apellidos"
+                      className="text-xs font-semibold"
+                    >
                       Apellidos <span className="text-red-400">*</span>
                     </Label>
-                    <Input id="apellidos" {...register('apellidos')} className={errors.apellidos ? 'border-red-400' : ''} />
-                    {errors.apellidos && <p className="text-xs text-red-500">{errors.apellidos.message}</p>}
+                    <Input
+                      id="apellidos"
+                      {...register('apellidos')}
+                      className={errors.apellidos ? 'border-red-400' : ''}
+                    />
+                    {errors.apellidos && (
+                      <p className="text-xs text-red-500">
+                        {errors.apellidos.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="nombres" className="text-xs font-semibold">
                       Nombres <span className="text-red-400">*</span>
                     </Label>
-                    <Input id="nombres" {...register('nombres')} className={errors.nombres ? 'border-red-400' : ''} />
-                    {errors.nombres && <p className="text-xs text-red-500">{errors.nombres.message}</p>}
+                    <Input
+                      id="nombres"
+                      {...register('nombres')}
+                      className={errors.nombres ? 'border-red-400' : ''}
+                    />
+                    {errors.nombres && (
+                      <p className="text-xs text-red-500">
+                        {errors.nombres.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="dni" className="text-xs font-semibold">
                       DNI / CI <span className="text-red-400">*</span>
                     </Label>
-                    <Input id="dni" {...register('dni')} placeholder="12345678" className={errors.dni ? 'border-red-400' : ''} />
-                    {errors.dni && <p className="text-xs text-red-500">{errors.dni.message}</p>}
+                    <Input
+                      id="dni"
+                      {...register('dni')}
+                      placeholder="12345678"
+                      className={errors.dni ? 'border-red-400' : ''}
+                    />
+                    {errors.dni && (
+                      <p className="text-xs text-red-500">
+                        {errors.dni.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Row: CUIL, Sexo, Fecha Nac */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="cuil" className="text-xs font-semibold">CUIL</Label>
-                    <Input id="cuil" {...register('cuil')} placeholder="20-12345678-9" />
+                    <Label htmlFor="cuil" className="text-xs font-semibold">
+                      CUIL
+                    </Label>
+                    <Input
+                      id="cuil"
+                      {...register('cuil')}
+                      placeholder="20-12345678-9"
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="sexo" className="text-xs font-semibold">
                       Sexo <span className="text-red-400">*</span>
                     </Label>
-                    <select id="sexo" {...register('sexo')} className={selectClass(false)}>
+                    <select
+                      id="sexo"
+                      {...register('sexo')}
+                      className={selectClass(false)}
+                    >
                       <option value="M">Masculino</option>
                       <option value="F">Femenino</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="fechaNacimiento" className="text-xs font-semibold">
-                      Fecha de Nacimiento <span className="text-red-400">*</span>
+                    <Label
+                      htmlFor="fechaNacimiento"
+                      className="text-xs font-semibold"
+                    >
+                      Fecha de Nacimiento{' '}
+                      <span className="text-red-400">*</span>
                     </Label>
-                    <Input id="fechaNacimiento" type="date" {...register('fechaNacimiento')} className={errors.fechaNacimiento ? 'border-red-400' : ''} />
-                    {errors.fechaNacimiento && <p className="text-xs text-red-500">{errors.fechaNacimiento.message}</p>}
+                    <Input
+                      id="fechaNacimiento"
+                      type="date"
+                      {...register('fechaNacimiento')}
+                      className={errors.fechaNacimiento ? 'border-red-400' : ''}
+                    />
+                    {errors.fechaNacimiento && (
+                      <p className="text-xs text-red-500">
+                        {errors.fechaNacimiento.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Row: Estado Civil, Profesión, Prontuario */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="estadoCivil" className="text-xs font-semibold">Estado Civil</Label>
-                    <select id="estadoCivil" {...register('estadoCivil')} className={selectClass(false)}>
+                    <Label
+                      htmlFor="estadoCivil"
+                      className="text-xs font-semibold"
+                    >
+                      Estado Civil
+                    </Label>
+                    <select
+                      id="estadoCivil"
+                      {...register('estadoCivil')}
+                      className={selectClass(false)}
+                    >
                       <option value="SOLTERO">Soltero/a</option>
                       <option value="CASADO">Casado/a</option>
                       <option value="DIVORCIADO">Divorciado/a</option>
@@ -513,11 +612,21 @@ const PersonalNew = () => {
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="profesion" className="text-xs font-semibold">Profesión</Label>
+                    <Label
+                      htmlFor="profesion"
+                      className="text-xs font-semibold"
+                    >
+                      Profesión
+                    </Label>
                     <Input id="profesion" {...register('profesion')} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="prontuario" className="text-xs font-semibold">Prontuario</Label>
+                    <Label
+                      htmlFor="prontuario"
+                      className="text-xs font-semibold"
+                    >
+                      Prontuario
+                    </Label>
                     <Input id="prontuario" {...register('prontuario')} />
                   </div>
                 </div>
@@ -525,8 +634,17 @@ const PersonalNew = () => {
                 {/* Row: Grupo Sanguíneo, Nacionalidad */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="grupoSanguineo" className="text-xs font-semibold">Grupo Sanguíneo</Label>
-                    <select id="grupoSanguineo" {...register('grupoSanguineo')} className={selectClass(false)}>
+                    <Label
+                      htmlFor="grupoSanguineo"
+                      className="text-xs font-semibold"
+                    >
+                      Grupo Sanguíneo
+                    </Label>
+                    <select
+                      id="grupoSanguineo"
+                      {...register('grupoSanguineo')}
+                      className={selectClass(false)}
+                    >
                       <option value="">Seleccionar...</option>
                       <option value="A+">A+</option>
                       <option value="A-">A-</option>
@@ -539,8 +657,17 @@ const PersonalNew = () => {
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="nacionalidad" className="text-xs font-semibold">Nacionalidad</Label>
-                    <Input id="nacionalidad" {...register('nacionalidad')} placeholder="Argentina" />
+                    <Label
+                      htmlFor="nacionalidad"
+                      className="text-xs font-semibold"
+                    >
+                      Nacionalidad
+                    </Label>
+                    <Input
+                      id="nacionalidad"
+                      {...register('nacionalidad')}
+                      placeholder="Argentina"
+                    />
                   </div>
                 </div>
 
@@ -548,15 +675,35 @@ const PersonalNew = () => {
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-4">
                   <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                     <MapPin className="w-3.5 h-3.5" />
-                    <span className="font-medium uppercase tracking-wider">Dirección</span>
+                    <span className="font-medium uppercase tracking-wider">
+                      Dirección
+                    </span>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="domicilio" className="text-xs font-semibold">Domicilio</Label>
-                    <Input id="domicilio" {...register('domicilio')} placeholder="Calle, número, localidad" />
+                    <Label
+                      htmlFor="domicilio"
+                      className="text-xs font-semibold"
+                    >
+                      Domicilio
+                    </Label>
+                    <Input
+                      id="domicilio"
+                      {...register('domicilio')}
+                      placeholder="Calle, número, localidad"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="localidad" className="text-xs font-semibold">Localidad</Label>
-                    <Input id="localidad" {...register('localidad')} placeholder="Ciudad o localidad" />
+                    <Label
+                      htmlFor="localidad"
+                      className="text-xs font-semibold"
+                    >
+                      Localidad
+                    </Label>
+                    <Input
+                      id="localidad"
+                      {...register('localidad')}
+                      placeholder="Ciudad o localidad"
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -564,7 +711,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 3. Datos Laborales ═══ */}
-          <div ref={el => (sectionRefs.current.laboral = el)} data-section="laboral">
+          <div
+            ref={el => (sectionRefs.current.laboral = el)}
+            data-section="laboral"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -573,7 +723,9 @@ const PersonalNew = () => {
                   </div>
                   <div>
                     <CardTitle className="text-base">Datos Laborales</CardTitle>
-                    <CardDescription className="text-xs">Información del cargo y dependencia</CardDescription>
+                    <CardDescription className="text-xs">
+                      Información del cargo y dependencia
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -581,52 +733,108 @@ const PersonalNew = () => {
                 {/* Row: N° Asignación, Tipo Personal, Jerarquía */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="numeroAsignacion" className="text-xs font-semibold">N° de Asignación</Label>
-                    <Input id="numeroAsignacion" {...register('numeroAsignacion')} placeholder="A-12345" />
+                    <Label
+                      htmlFor="numeroAsignacion"
+                      className="text-xs font-semibold"
+                    >
+                      N° de Asignación
+                    </Label>
+                    <Input
+                      id="numeroAsignacion"
+                      {...register('numeroAsignacion')}
+                      placeholder="A-12345"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="tipoPersonal" className="text-xs font-semibold">
+                    <Label
+                      htmlFor="tipoPersonal"
+                      className="text-xs font-semibold"
+                    >
                       Tipo de Personal <span className="text-red-400">*</span>
                     </Label>
-                    <select id="tipoPersonal" {...register('tipoPersonal')} className={selectClass(false)}>
+                    <select
+                      id="tipoPersonal"
+                      {...register('tipoPersonal')}
+                      className={selectClass(false)}
+                    >
                       <option value="SUPERIOR">Superior</option>
                       <option value="SUBALTERNO">Subalterno</option>
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="jerarquiaId" className="text-xs font-semibold">
+                    <Label
+                      htmlFor="jerarquiaId"
+                      className="text-xs font-semibold"
+                    >
                       Jerarquía <span className="text-red-400">*</span>
                     </Label>
-                    <select id="jerarquiaId" {...register('jerarquiaId')} className={selectClass(!!errors.jerarquiaId)}>
+                    <select
+                      id="jerarquiaId"
+                      {...register('jerarquiaId')}
+                      className={selectClass(!!errors.jerarquiaId)}
+                    >
                       <option value="">Seleccionar...</option>
                       {jerarquiasAMostrar.map((jerarquia, index) => (
-                        <option key={index} value={jerarquia}>{jerarquia}</option>
+                        <option key={index} value={jerarquia}>
+                          {jerarquia}
+                        </option>
                       ))}
                     </select>
-                    {errors.jerarquiaId && <p className="text-xs text-red-500">{errors.jerarquiaId.message}</p>}
+                    {errors.jerarquiaId && (
+                      <p className="text-xs text-red-500">
+                        {errors.jerarquiaId.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Row: N° Cargo, Sección, Función */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="numeroCargo" className="text-xs font-semibold">N° de Cargo</Label>
-                    <Input id="numeroCargo" {...register('numeroCargo')} placeholder="Número de cargo" />
+                    <Label
+                      htmlFor="numeroCargo"
+                      className="text-xs font-semibold"
+                    >
+                      N° de Cargo
+                    </Label>
+                    <Input
+                      id="numeroCargo"
+                      {...register('numeroCargo')}
+                      placeholder="Número de cargo"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="seccionId" className="text-xs font-semibold">
+                    <Label
+                      htmlFor="seccionId"
+                      className="text-xs font-semibold"
+                    >
                       Sección <span className="text-red-400">*</span>
                     </Label>
-                    <select id="seccionId" {...register('seccionId')} className={selectClass(!!errors.seccionId)}>
+                    <select
+                      id="seccionId"
+                      {...register('seccionId')}
+                      className={selectClass(!!errors.seccionId)}
+                    >
                       <option value="">Seleccione una sección...</option>
                       {seccionesDisponibles.map((seccion, index) => (
-                        <option key={index} value={seccion}>{seccion}</option>
+                        <option key={index} value={seccion}>
+                          {seccion}
+                        </option>
                       ))}
                     </select>
-                    {errors.seccionId && <p className="text-xs text-red-500">{errors.seccionId.message}</p>}
+                    {errors.seccionId && (
+                      <p className="text-xs text-red-500">
+                        {errors.seccionId.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="funcionDepto" className="text-xs font-semibold">Función en Departamento</Label>
+                    <Label
+                      htmlFor="funcionDepto"
+                      className="text-xs font-semibold"
+                    >
+                      Función en Departamento
+                    </Label>
                     <Input id="funcionDepto" {...register('funcionDepto')} />
                   </div>
                 </div>
@@ -634,16 +842,36 @@ const PersonalNew = () => {
                 {/* Row: Horario, Jurisdicción, Regional */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="horarioLaboral" className="text-xs font-semibold">Horario Laboral</Label>
-                    <Input id="horarioLaboral" {...register('horarioLaboral')} placeholder="08:00 - 16:00" />
+                    <Label
+                      htmlFor="horarioLaboral"
+                      className="text-xs font-semibold"
+                    >
+                      Horario Laboral
+                    </Label>
+                    <Input
+                      id="horarioLaboral"
+                      {...register('horarioLaboral')}
+                      placeholder="08:00 - 16:00"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="jurisdiccion" className="text-xs font-semibold">Jurisdicción</Label>
+                    <Label
+                      htmlFor="jurisdiccion"
+                      className="text-xs font-semibold"
+                    >
+                      Jurisdicción
+                    </Label>
                     <Input id="jurisdiccion" {...register('jurisdiccion')} />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="regional" className="text-xs font-semibold">Regional</Label>
-                    <select id="regional" {...register('regional')} className={selectClass(false)}>
+                    <Label htmlFor="regional" className="text-xs font-semibold">
+                      Regional
+                    </Label>
+                    <select
+                      id="regional"
+                      {...register('regional')}
+                      className={selectClass(false)}
+                    >
                       <option value="">Seleccionar...</option>
                       <option value="CAPITAL">Capital</option>
                       <option value="NORTE">Norte</option>
@@ -657,7 +885,12 @@ const PersonalNew = () => {
                 {/* Subsidio */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="subsidioSalud" className="text-xs font-semibold">Subsidio de Salud</Label>
+                    <Label
+                      htmlFor="subsidioSalud"
+                      className="text-xs font-semibold"
+                    >
+                      Subsidio de Salud
+                    </Label>
                     <Input id="subsidioSalud" {...register('subsidioSalud')} />
                   </div>
                 </div>
@@ -666,7 +899,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 4. Información de Contacto ═══ */}
-          <div ref={el => (sectionRefs.current.contacto = el)} data-section="contacto">
+          <div
+            ref={el => (sectionRefs.current.contacto = el)}
+            data-section="contacto"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
@@ -675,14 +911,21 @@ const PersonalNew = () => {
                       <Phone className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Información de Contacto</CardTitle>
+                      <CardTitle className="text-base">
+                        Información de Contacto
+                      </CardTitle>
                     </div>
                   </div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => setContactosAdicionales([...contactosAdicionales, { tipo: 'celular', valor: '' }])}
+                    onClick={() =>
+                      setContactosAdicionales([
+                        ...contactosAdicionales,
+                        { tipo: 'celular', valor: '' },
+                      ])
+                    }
                     className="text-xs h-8 hover:bg-police-cyan/10 hover:border-police-cyan hover:text-police-cyan"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1" />
@@ -693,13 +936,31 @@ const PersonalNew = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="celular" className="text-xs font-semibold">Celular Principal</Label>
-                    <Input id="celular" {...register('celular')} placeholder="+549 11 1234-5678" />
+                    <Label htmlFor="celular" className="text-xs font-semibold">
+                      Celular Principal
+                    </Label>
+                    <Input
+                      id="celular"
+                      {...register('celular')}
+                      placeholder="+549 11 1234-5678"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-xs font-semibold">Email Principal</Label>
-                    <Input id="email" type="email" {...register('email')} placeholder="usuario@ejemplo.com" className={errors.email ? 'border-red-400' : ''} />
-                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                    <Label htmlFor="email" className="text-xs font-semibold">
+                      Email Principal
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...register('email')}
+                      placeholder="usuario@ejemplo.com"
+                      className={errors.email ? 'border-red-400' : ''}
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-red-500">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -725,7 +986,7 @@ const PersonalNew = () => {
                         >
                           <select
                             value={contacto.tipo}
-                            onChange={(e) => {
+                            onChange={e => {
                               const nuevosContactos = [...contactosAdicionales];
                               nuevosContactos[index].tipo = e.target.value;
                               setContactosAdicionales(nuevosContactos);
@@ -739,19 +1000,29 @@ const PersonalNew = () => {
                           </select>
                           <Input
                             value={contacto.valor}
-                            onChange={(e) => {
+                            onChange={e => {
                               const nuevosContactos = [...contactosAdicionales];
                               nuevosContactos[index].valor = e.target.value;
                               setContactosAdicionales(nuevosContactos);
                             }}
-                            placeholder={contacto.tipo === 'email' ? 'correo@ejemplo.com' : 'Número de teléfono'}
+                            placeholder={
+                              contacto.tipo === 'email'
+                                ? 'correo@ejemplo.com'
+                                : 'Número de teléfono'
+                            }
                             className="flex-1"
                           />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => setContactosAdicionales(contactosAdicionales.filter((_, i) => i !== index))}
+                            onClick={() =>
+                              setContactosAdicionales(
+                                contactosAdicionales.filter(
+                                  (_, i) => i !== index
+                                )
+                              )
+                            }
                             className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 flex-shrink-0"
                           >
                             <X className="w-3.5 h-3.5" />
@@ -766,7 +1037,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 5. Armamento ═══ */}
-          <div ref={el => (sectionRefs.current.armamento = el)} data-section="armamento">
+          <div
+            ref={el => (sectionRefs.current.armamento = el)}
+            data-section="armamento"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -774,30 +1048,53 @@ const PersonalNew = () => {
                     <Shield className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">Armamento Asignado</CardTitle>
-                    <CardDescription className="text-xs">Información sobre el armamento (opcional)</CardDescription>
+                    <CardTitle className="text-base">
+                      Armamento Asignado
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Información sobre el armamento (opcional)
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="armaTipo" className="text-xs font-semibold">Tipo de Arma</Label>
-                    <Input id="armaTipo" {...register('armaTipo')} placeholder="Pistola 9mm" />
+                    <Label htmlFor="armaTipo" className="text-xs font-semibold">
+                      Tipo de Arma
+                    </Label>
+                    <Input
+                      id="armaTipo"
+                      {...register('armaTipo')}
+                      placeholder="Pistola 9mm"
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="nroArma" className="text-xs font-semibold">N° de Arma</Label>
-                    <Input id="nroArma" {...register('nroArma')} placeholder="Número de serie" />
+                    <Label htmlFor="nroArma" className="text-xs font-semibold">
+                      N° de Arma
+                    </Label>
+                    <Input
+                      id="nroArma"
+                      {...register('nroArma')}
+                      placeholder="Número de serie"
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="poseeChalecoAsignado" className="text-xs font-semibold">Chaleco Asignado</Label>
+                    <Label
+                      htmlFor="poseeChalecoAsignado"
+                      className="text-xs font-semibold"
+                    >
+                      Chaleco Asignado
+                    </Label>
                     <select
                       id="poseeChalecoAsignado"
                       {...register('poseeChalecoAsignado')}
                       className={selectClass(false)}
-                      onChange={e => setPoseeChalecoState(e.target.value === 'SI')}
+                      onChange={e =>
+                        setPoseeChalecoState(e.target.value === 'SI')
+                      }
                     >
                       <option value="NO">No</option>
                       <option value="SI">Sí</option>
@@ -809,8 +1106,17 @@ const PersonalNew = () => {
                       animate={{ opacity: 1, x: 0 }}
                       className="space-y-1.5"
                     >
-                      <Label htmlFor="nroSerieChalecoAsignado" className="text-xs font-semibold">N° de Serie Chaleco</Label>
-                      <Input id="nroSerieChalecoAsignado" {...register('nroSerieChalecoAsignado')} placeholder="Número de serie" />
+                      <Label
+                        htmlFor="nroSerieChalecoAsignado"
+                        className="text-xs font-semibold"
+                      >
+                        N° de Serie Chaleco
+                      </Label>
+                      <Input
+                        id="nroSerieChalecoAsignado"
+                        {...register('nroSerieChalecoAsignado')}
+                        placeholder="Número de serie"
+                      />
                     </motion.div>
                   )}
                 </div>
@@ -819,7 +1125,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 6. Otros ═══ */}
-          <div ref={el => (sectionRefs.current.otros = el)} data-section="otros">
+          <div
+            ref={el => (sectionRefs.current.otros = el)}
+            data-section="otros"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -828,14 +1137,21 @@ const PersonalNew = () => {
                   </div>
                   <div>
                     <CardTitle className="text-base">Otros</CardTitle>
-                    <CardDescription className="text-xs">Información adicional del personal</CardDescription>
+                    <CardDescription className="text-xs">
+                      Información adicional del personal
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="poseeCarnetManejo" className="text-xs font-semibold">Posee Carnet de Manejo</Label>
+                    <Label
+                      htmlFor="poseeCarnetManejo"
+                      className="text-xs font-semibold"
+                    >
+                      Posee Carnet de Manejo
+                    </Label>
                     <select
                       id="poseeCarnetManejo"
                       {...register('poseeCarnetManejo')}
@@ -847,8 +1163,17 @@ const PersonalNew = () => {
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="poseeCredencialPolicial" className="text-xs font-semibold">Posee Credencial Policial</Label>
-                    <select id="poseeCredencialPolicial" {...register('poseeCredencialPolicial')} className={selectClass(false)}>
+                    <Label
+                      htmlFor="poseeCredencialPolicial"
+                      className="text-xs font-semibold"
+                    >
+                      Posee Credencial Policial
+                    </Label>
+                    <select
+                      id="poseeCredencialPolicial"
+                      {...register('poseeCredencialPolicial')}
+                      className={selectClass(false)}
+                    >
                       <option value="NO">No</option>
                       <option value="SI">Sí</option>
                     </select>
@@ -866,15 +1191,33 @@ const PersonalNew = () => {
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <Car className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conduce</span>
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Conduce
+                        </span>
                       </div>
                       <div className="flex flex-wrap gap-4">
                         {[
-                          { id: 'conduceAutos', label: 'Autos', reg: 'conduceAutos' },
-                          { id: 'conduceMotos', label: 'Motos', reg: 'conduceMotos' },
-                          { id: 'conduceOtros', label: 'Otros', reg: 'conduceOtros' },
+                          {
+                            id: 'conduceAutos',
+                            label: 'Autos',
+                            reg: 'conduceAutos',
+                          },
+                          {
+                            id: 'conduceMotos',
+                            label: 'Motos',
+                            reg: 'conduceMotos',
+                          },
+                          {
+                            id: 'conduceOtros',
+                            label: 'Otros',
+                            reg: 'conduceOtros',
+                          },
                         ].map(item => (
-                          <label key={item.id} htmlFor={item.id} className="flex items-center gap-2 cursor-pointer group">
+                          <label
+                            key={item.id}
+                            htmlFor={item.id}
+                            className="flex items-center gap-2 cursor-pointer group"
+                          >
                             <input
                               type="checkbox"
                               id={item.id}
@@ -895,16 +1238,36 @@ const PersonalNew = () => {
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2 mb-3 text-xs text-slate-400 dark:text-slate-500">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span className="font-medium uppercase tracking-wider">Fechas de Alta</span>
+                    <span className="font-medium uppercase tracking-wider">
+                      Fechas de Alta
+                    </span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="altaReparticion" className="text-xs font-semibold">Alta en la Repartición</Label>
-                      <Input id="altaReparticion" type="date" {...register('altaReparticion')} />
+                      <Label
+                        htmlFor="altaReparticion"
+                        className="text-xs font-semibold"
+                      >
+                        Alta en la Repartición
+                      </Label>
+                      <Input
+                        id="altaReparticion"
+                        type="date"
+                        {...register('altaReparticion')}
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="altaDepartamental" className="text-xs font-semibold">Alta Departamental</Label>
-                      <Input id="altaDepartamental" type="date" {...register('altaDepartamental')} />
+                      <Label
+                        htmlFor="altaDepartamental"
+                        className="text-xs font-semibold"
+                      >
+                        Alta Departamental
+                      </Label>
+                      <Input
+                        id="altaDepartamental"
+                        type="date"
+                        {...register('altaDepartamental')}
+                      />
                     </div>
                   </div>
                 </div>
@@ -913,7 +1276,10 @@ const PersonalNew = () => {
           </div>
 
           {/* ═══ 7. Archivos Adjuntos ═══ */}
-          <div ref={el => (sectionRefs.current.archivos = el)} data-section="archivos">
+          <div
+            ref={el => (sectionRefs.current.archivos = el)}
+            data-section="archivos"
+          >
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
@@ -921,8 +1287,12 @@ const PersonalNew = () => {
                     <Paperclip className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-base">Archivos Adjuntos</CardTitle>
-                    <CardDescription className="text-xs">Documentos relacionados (opcional)</CardDescription>
+                    <CardTitle className="text-base">
+                      Archivos Adjuntos
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Documentos relacionados (opcional)
+                    </CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -936,14 +1306,19 @@ const PersonalNew = () => {
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                     Click o arrastre archivos aquí
                   </p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">PDF, PNG, JPG — Máx 10MB c/u</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                    PDF, PNG, JPG — Máx 10MB c/u
+                  </p>
                 </div>
 
                 {archivos.length > 0 && (
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <Paperclip className="w-3.5 h-3.5" />
-                      <span className="font-semibold">{archivos.length} archivo{archivos.length > 1 ? 's' : ''}</span>
+                      <span className="font-semibold">
+                        {archivos.length} archivo
+                        {archivos.length > 1 ? 's' : ''}
+                      </span>
                     </div>
                     {archivos.map((archivo, index) => (
                       <div
@@ -955,15 +1330,23 @@ const PersonalNew = () => {
                             <FileText className="w-4 h-4 text-police-cyan" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{archivo.name}</p>
-                            <p className="text-xs text-slate-400">{(archivo.size / 1024).toFixed(1)} KB</p>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+                              {archivo.name}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {(archivo.size / 1024).toFixed(1)} KB
+                            </p>
                           </div>
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() => setArchivos(prev => prev.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            setArchivos(prev =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
                           className="h-7 w-7 p-0 opacity-0 group-hover/file:opacity-100 hover:bg-red-100 hover:text-red-600 transition-all"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -982,7 +1365,8 @@ const PersonalNew = () => {
       <div className="fixed bottom-0 inset-x-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <p className="text-xs text-slate-400 dark:text-slate-500 hidden sm:block">
-            Los campos marcados con <span className="text-red-400 font-bold">*</span> son obligatorios
+            Los campos marcados con{' '}
+            <span className="text-red-400 font-bold">*</span> son obligatorios
           </p>
           <div className="flex gap-3 ml-auto">
             <Button
@@ -1005,7 +1389,11 @@ const PersonalNew = () => {
                   <motion.span
                     className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                    transition={{
+                      duration: 0.8,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
                   />
                   Guardando...
                 </span>

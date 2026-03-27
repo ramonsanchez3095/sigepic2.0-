@@ -12,10 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectItem,
-} from '@/components/ui/select';
+import { Select, SelectItem } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Loading from '@/components/common/Loading';
@@ -43,7 +40,7 @@ export default function PersonalList() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [search, setSearch] = useState('');
-  
+
   // Filtros avanzados
   const [filters, setFilters] = useState({
     tipoPersonal: '',
@@ -82,7 +79,7 @@ export default function PersonalList() {
         sortOrder: sortConfig.direction,
         ...activeFilters,
       };
-      
+
       // Limpiar params vacíos
       Object.keys(params).forEach(key => {
         if (params[key] === '' || params[key] === null) {
@@ -103,10 +100,11 @@ export default function PersonalList() {
     }
   };
 
-  const handleSort = (key) => {
+  const handleSort = key => {
     setSortConfig(current => ({
       key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
+      direction:
+        current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
@@ -138,7 +136,7 @@ export default function PersonalList() {
         sortOrder: sortConfig.direction,
         ...activeFilters,
       };
-      
+
       // Limpiar params vacíos
       Object.keys(params).forEach(key => {
         if (params[key] === '' || params[key] === null) {
@@ -147,12 +145,15 @@ export default function PersonalList() {
       });
 
       const response = await personalService.exportar(params);
-      
+
       // Crear blob y descargar
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `personal_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        'download',
+        `personal_export_${new Date().toISOString().split('T')[0]}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -166,10 +167,10 @@ export default function PersonalList() {
   const handleStatusChange = async (id, newStatus) => {
     try {
       // Optimistic update
-      setPersonal(prev => prev.map(p => 
-        p.id === id ? { ...p, estadoServicio: newStatus } : p
-      ));
-      
+      setPersonal(prev =>
+        prev.map(p => (p.id === id ? { ...p, estadoServicio: newStatus } : p))
+      );
+
       await personalService.actualizar(id, { estadoServicio: newStatus });
     } catch (error) {
       console.error('Error actualizando estado:', error);
@@ -179,10 +180,12 @@ export default function PersonalList() {
   };
 
   // Conteo de filtros activos
-  const activeFilterCount = Object.values(activeFilters).filter(v => v && v !== '').length;
+  const activeFilterCount = Object.values(activeFilters).filter(
+    v => v && v !== ''
+  ).length;
 
   // Helpers de estado
-  const getEstadoBadge = (estado) => {
+  const getEstadoBadge = estado => {
     const map = {
       ACTIVO: { variant: 'success', label: 'Activo' },
       INACTIVO: { variant: 'default', label: 'Inactivo' },
@@ -205,7 +208,11 @@ export default function PersonalList() {
     } else {
       pages.push(1);
       if (current > 3) pages.push('...');
-      for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+      for (
+        let i = Math.max(2, current - 1);
+        i <= Math.min(total - 1, current + 1);
+        i++
+      ) {
         pages.push(i);
       }
       if (current < total - 2) pages.push('...');
@@ -240,7 +247,9 @@ export default function PersonalList() {
                     Personal
                   </h1>
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {pagination.total} miembro{pagination.total !== 1 ? 's' : ''} registrado{pagination.total !== 1 ? 's' : ''}
+                    {pagination.total} miembro
+                    {pagination.total !== 1 ? 's' : ''} registrado
+                    {pagination.total !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
@@ -271,7 +280,10 @@ export default function PersonalList() {
                   <Input
                     placeholder="Buscar por nombre, DNI, número de asignación..."
                     value={search}
-                    onChange={e => { setSearch(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
+                    onChange={e => {
+                      setSearch(e.target.value);
+                      setPagination(prev => ({ ...prev, page: 1 }));
+                    }}
                     className="pl-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-colors"
                   />
                 </div>
@@ -280,7 +292,9 @@ export default function PersonalList() {
                   variant="outline"
                   onClick={() => setIsFilterOpen(true)}
                   className={`relative border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 ${
-                    activeFilterCount > 0 ? 'border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/20' : ''
+                    activeFilterCount > 0
+                      ? 'border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/20'
+                      : ''
                   }`}
                 >
                   <Filter className="h-4 w-4 mr-2" />
@@ -306,10 +320,17 @@ export default function PersonalList() {
               {/* Chips de filtros activos */}
               {activeFilterCount > 0 && (
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Filtros:</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">
+                    Filtros:
+                  </span>
                   {Object.entries(activeFilters).map(([key, value]) => {
                     if (!value) return null;
-                    const labels = { tipoPersonal: 'Tipo', jerarquia: 'Jerarquía', seccion: 'Sección', estadoServicio: 'Estado' };
+                    const labels = {
+                      tipoPersonal: 'Tipo',
+                      jerarquia: 'Jerarquía',
+                      seccion: 'Sección',
+                      estadoServicio: 'Estado',
+                    };
                     return (
                       <span
                         key={key}
@@ -346,7 +367,10 @@ export default function PersonalList() {
 
         {/* Diálogo de filtros */}
         <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800" onClose={() => setIsFilterOpen(false)}>
+          <DialogContent
+            className="sm:max-w-[425px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+            onClose={() => setIsFilterOpen(false)}
+          >
             <DialogHeader>
               <DialogTitle className="text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-600" />
@@ -355,10 +379,14 @@ export default function PersonalList() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label className="text-slate-700 dark:text-slate-300">Tipo de Personal</Label>
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Tipo de Personal
+                </Label>
                 <Select
                   value={filters.tipoPersonal}
-                  onChange={(e) => setFilters({...filters, tipoPersonal: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, tipoPersonal: e.target.value })
+                  }
                   className="bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 >
                   <option value="">Todos</option>
@@ -367,28 +395,40 @@ export default function PersonalList() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label className="text-slate-700 dark:text-slate-300">Jerarquía</Label>
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Jerarquía
+                </Label>
                 <Input
                   value={filters.jerarquia}
-                  onChange={(e) => setFilters({...filters, jerarquia: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, jerarquia: e.target.value })
+                  }
                   placeholder="Ej: Comisario"
                   className="bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
                 />
               </div>
               <div className="grid gap-2">
-                <Label className="text-slate-700 dark:text-slate-300">Sección</Label>
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Sección
+                </Label>
                 <Input
                   value={filters.seccion}
-                  onChange={(e) => setFilters({...filters, seccion: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, seccion: e.target.value })
+                  }
                   placeholder="Ej: Investigaciones"
                   className="bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
                 />
               </div>
               <div className="grid gap-2">
-                <Label className="text-slate-700 dark:text-slate-300">Estado de Servicio</Label>
+                <Label className="text-slate-700 dark:text-slate-300">
+                  Estado de Servicio
+                </Label>
                 <Select
                   value={filters.estadoServicio}
-                  onChange={(e) => setFilters({...filters, estadoServicio: e.target.value})}
+                  onChange={e =>
+                    setFilters({ ...filters, estadoServicio: e.target.value })
+                  }
                   className="bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                 >
                   <option value="">Todos</option>
@@ -402,10 +442,17 @@ export default function PersonalList() {
               </div>
             </div>
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={handleClearFilters} className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+                className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+              >
                 Limpiar
               </Button>
-              <Button onClick={handleApplyFilters} className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600">
+              <Button
+                onClick={handleApplyFilters}
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600"
+              >
                 Aplicar Filtros
               </Button>
             </DialogFooter>
@@ -429,7 +476,9 @@ export default function PersonalList() {
                   No se encontró personal
                 </p>
                 <p className="text-slate-400 dark:text-slate-500 text-sm mb-5">
-                  {search ? `No hay resultados para "${search}"` : 'Aún no hay registros de personal'}
+                  {search
+                    ? `No hay resultados para "${search}"`
+                    : 'Aún no hay registros de personal'}
                 </p>
                 {!search && (
                   <Button
@@ -456,12 +505,24 @@ export default function PersonalList() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-200 dark:border-slate-800">
-                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Personal</th>
-                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Jerarquía / Cargo</th>
-                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sección</th>
-                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Horario</th>
-                      <th className="px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Estado</th>
-                      <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Acciones</th>
+                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Personal
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Jerarquía / Cargo
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Sección
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Horario
+                      </th>
+                      <th className="px-5 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Estado
+                      </th>
+                      <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
@@ -484,7 +545,8 @@ export default function PersonalList() {
                                 {p.apellidos?.toUpperCase()}, {p.nombres}
                               </p>
                               <p className="text-xs text-slate-400 dark:text-slate-500">
-                                {p.numeroAsignacion || 'Sin asignación'}{p.dni ? ` · DNI ${p.dni}` : ''}
+                                {p.numeroAsignacion || 'Sin asignación'}
+                                {p.dni ? ` · DNI ${p.dni}` : ''}
                               </p>
                             </div>
                           </div>
@@ -532,7 +594,9 @@ export default function PersonalList() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/personal/editar/${p.id}`)}
+                              onClick={() =>
+                                navigate(`/personal/editar/${p.id}`)
+                              }
                               className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30"
                               title="Editar"
                             >
@@ -550,29 +614,44 @@ export default function PersonalList() {
               <div className="px-5 py-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {(pagination.page - 1) * pagination.limit + 1}–{Math.min(pagination.page * pagination.limit, pagination.total)}
-                  </span>
-                  {' '}de {pagination.total}
+                    {(pagination.page - 1) * pagination.limit + 1}–
+                    {Math.min(
+                      pagination.page * pagination.limit,
+                      pagination.total
+                    )}
+                  </span>{' '}
+                  de {pagination.total}
                 </p>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
                     disabled={pagination.page === 1}
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    onClick={() =>
+                      setPagination(prev => ({ ...prev, page: prev.page - 1 }))
+                    }
                     className="h-8 w-8 p-0 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 disabled:opacity-40"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   {getPageNumbers().map((pageNum, i) =>
                     pageNum === '...' ? (
-                      <span key={`dots-${i}`} className="w-8 text-center text-sm text-slate-400">...</span>
+                      <span
+                        key={`dots-${i}`}
+                        className="w-8 text-center text-sm text-slate-400"
+                      >
+                        ...
+                      </span>
                     ) : (
                       <Button
                         key={pageNum}
-                        variant={pagination.page === pageNum ? 'default' : 'ghost'}
+                        variant={
+                          pagination.page === pageNum ? 'default' : 'ghost'
+                        }
                         size="sm"
-                        onClick={() => setPagination(prev => ({ ...prev, page: pageNum }))}
+                        onClick={() =>
+                          setPagination(prev => ({ ...prev, page: pageNum }))
+                        }
                         className={`h-8 w-8 p-0 rounded-lg text-sm font-medium ${
                           pagination.page === pageNum
                             ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
@@ -587,7 +666,9 @@ export default function PersonalList() {
                     variant="ghost"
                     size="sm"
                     disabled={pagination.page === pagination.totalPages}
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    onClick={() =>
+                      setPagination(prev => ({ ...prev, page: prev.page + 1 }))
+                    }
                     className="h-8 w-8 p-0 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 disabled:opacity-40"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -630,29 +711,45 @@ export default function PersonalList() {
                         <div className="flex items-start gap-2">
                           <Shield className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400 dark:text-slate-500">Jerarquía</p>
-                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">{p.jerarquia || '-'}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              Jerarquía
+                            </p>
+                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
+                              {p.jerarquia || '-'}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
                           <Building2 className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400 dark:text-slate-500">Sección</p>
-                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">{p.seccion || '-'}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              Sección
+                            </p>
+                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
+                              {p.seccion || '-'}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
                           <Clock className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400 dark:text-slate-500">Horario</p>
-                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">{p.horarioLaboral || '-'}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              Horario
+                            </p>
+                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
+                              {p.horarioLaboral || '-'}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
                           <UserCircle className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400 dark:text-slate-500">Función</p>
-                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">{p.funcionDepto || '-'}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">
+                              Función
+                            </p>
+                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
+                              {p.funcionDepto || '-'}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -691,7 +788,9 @@ export default function PersonalList() {
                     variant="outline"
                     size="sm"
                     disabled={pagination.page === 1}
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                    onClick={() =>
+                      setPagination(prev => ({ ...prev, page: prev.page - 1 }))
+                    }
                     className="h-9"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -700,7 +799,9 @@ export default function PersonalList() {
                     variant="outline"
                     size="sm"
                     disabled={pagination.page === pagination.totalPages}
-                    onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                    onClick={() =>
+                      setPagination(prev => ({ ...prev, page: prev.page + 1 }))
+                    }
                     className="h-9"
                   >
                     <ChevronRight className="h-4 w-4" />
