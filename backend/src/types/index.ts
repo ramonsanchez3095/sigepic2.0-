@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import type { SignOptions } from 'jsonwebtoken';
 
 // ============================================
 // Auth & User Types
@@ -199,7 +200,7 @@ export interface ApiSuccess<T = unknown> {
 
 export interface JwtConfig {
   secret: string;
-  expiresIn: string;
+  expiresIn: SignOptions['expiresIn'];
   refreshSecret: string;
-  refreshExpiresIn: string;
+  refreshExpiresIn: SignOptions['expiresIn'];
 }
