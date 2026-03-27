@@ -8,10 +8,14 @@ import {
   Edit,
   CalendarDays,
   ClipboardList,
-  ChevronDown,
-  ChevronUp,
   AlertCircle,
   CheckCircle,
+  Clock,
+  TrendingDown,
+  Briefcase,
+  Calendar,
+  User,
+  FileText,
 } from 'lucide-react';
 import { licenciaService } from '../services/licencia.service';
 import { personalService } from '../services/personal.service';
@@ -361,31 +365,46 @@ const PersonalLicencias = () => {
     return <Loading />;
   }
 
+  // Porcentaje de uso para la barra de progreso
+  const usagePercent = resumen
+    ? Math.min(
+        100,
+        Math.round((resumen.diasUsados / (resumen.diasLicenciaAnuales || 1)) * 100)
+      )
+    : 0;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      {/* Hero Header */}
+      <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm border-b border-slate-200/80 dark:border-slate-800/80 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => navigate(-1)}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(-1)}
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 -ml-2"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1.5" />
                 Volver
               </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100">
-                  <ClipboardList className="inline w-8 h-8 mr-2 text-blue-600" />
-                  Licencias
-                </h1>
-                {personal && (
-                  <p className="text-gray-600 dark:text-slate-400 mt-1">
-                    {personal.nombres} {personal.apellidos}
-                  </p>
-                )}
+              <div className="h-6 w-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <ClipboardList className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                    Gestión de Licencias
+                  </h1>
+                  {personal && (
+                    <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" />
+                      {personal.nombres} {personal.apellidos}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -399,14 +418,17 @@ const PersonalLicencias = () => {
                     setShowForm(true);
                   }
                 }}
-                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+                className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-md shadow-blue-500/20 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Registrar Licencia
+                Nueva Licencia
               </Button>
             )}
           </div>
-        </motion.div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
 
         {/* Mensajes */}
         {error && (
@@ -442,27 +464,24 @@ const PersonalLicencias = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-6"
         >
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg">
-            <CardHeader className="pb-3">
+          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden">
+            <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg">
-                    Resumen Anual de Licencias
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    Resumen Anual
                   </CardTitle>
                   <CardDescription>
-                    Estado de días de licencia del personal
+                    Balance de días de licencia
                   </CardDescription>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm font-medium dark:text-slate-300">
-                    Año:
-                  </Label>
                   <Select
                     value={anioFiltro}
                     onChange={e => setAnioFiltro(parseInt(e.target.value))}
-                    className="w-28 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
+                    className="w-28 text-sm font-medium dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200"
                   >
                     {aniosOptions.map(anio => (
                       <SelectItem key={anio} value={anio}>
@@ -473,104 +492,160 @@ const PersonalLicencias = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-5">
               {resumen ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                <>
+                  {/* Barra de progreso visual */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500 dark:text-slate-400">
+                        {resumen.diasUsados} de {resumen.diasLicenciaAnuales ?? 0} días utilizados
+                      </span>
+                      <span className={`font-semibold ${
+                        usagePercent > 90 ? 'text-red-600 dark:text-red-400' :
+                        usagePercent > 70 ? 'text-amber-600 dark:text-amber-400' :
+                        'text-blue-600 dark:text-blue-400'
+                      }`}>
+                        {usagePercent}%
+                      </span>
+                    </div>
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${usagePercent}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                        className={`h-full rounded-full transition-colors ${
+                          usagePercent > 90
+                            ? 'bg-gradient-to-r from-red-400 to-red-500'
+                            : usagePercent > 70
+                              ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                              : 'bg-gradient-to-r from-blue-400 to-cyan-400'
+                        }`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Tarjetas de métricas */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Días Anuales */}
+                    <div className="group relative bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/20 dark:to-blue-800/10 rounded-xl p-5 border border-blue-100 dark:border-blue-800/50 transition-all duration-200 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700">
+                      <div className="flex items-start justify-between">
+                        <div className="h-10 w-10 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center mb-3">
+                          <Briefcase className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        {hasPermission('update') && !editingDias && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDiasInput(String(resumen.diasLicenciaAnuales ?? ''));
+                              setEditingDias(true);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/30 transition-all duration-200"
+                            title="Editar días anuales"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs font-medium text-blue-600/70 dark:text-blue-400/70 uppercase tracking-wider mb-1">
                         Días Anuales
                       </p>
-                      {hasPermission('update') && !editingDias && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDiasInput(String(resumen.diasLicenciaAnuales ?? ''));
-                            setEditingDias(true);
-                          }}
-                          className="text-blue-400 hover:text-blue-700 p-0.5 rounded transition-colors"
-                          title="Editar días anuales"
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </button>
+                      {editingDias ? (
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <input
+                            type="number"
+                            min="0"
+                            value={diasInput}
+                            onChange={e => setDiasInput(e.target.value)}
+                            className="w-20 h-9 rounded-lg border border-blue-300 dark:border-blue-600 px-2.5 text-sm text-blue-800 dark:text-blue-200 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            autoFocus
+                            onKeyDown={e => {
+                              if (e.key === 'Escape') setEditingDias(false);
+                              if (e.key === 'Enter') saveDiasAnuales();
+                            }}
+                          />
+                          <button
+                            type="button"
+                            disabled={savingDias}
+                            onClick={saveDiasAnuales}
+                            className="h-9 px-3 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                          >
+                            {savingDias ? '...' : 'OK'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditingDias(false)}
+                            className="h-9 px-2.5 text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
+                          {resumen.diasLicenciaAnuales ?? 0}
+                        </p>
                       )}
                     </div>
-                    {editingDias ? (
-                      <div className="flex items-center gap-1 mt-1">
-                        <input
-                          type="number"
-                          min="0"
-                          value={diasInput}
-                          onChange={e => setDiasInput(e.target.value)}
-                          className="w-20 h-8 rounded border border-blue-300 px-2 text-sm text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          autoFocus
-                          onKeyDown={e => {
-                            if (e.key === 'Escape') setEditingDias(false);
-                            if (e.key === 'Enter') saveDiasAnuales();
-                          }}
-                        />
-                        <button
-                          type="button"
-                          disabled={savingDias}
-                          onClick={saveDiasAnuales}
-                          className="h-8 px-2 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                        >
-                          {savingDias ? '...' : 'OK'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingDias(false)}
-                          className="h-8 px-2 text-xs bg-slate-200 text-slate-700 rounded hover:bg-slate-300 transition-colors"
-                        >
-                          ✕
-                        </button>
+
+                    {/* Días Usados */}
+                    <div className="relative bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-900/20 dark:to-amber-800/10 rounded-xl p-5 border border-amber-100 dark:border-amber-800/50 transition-all duration-200 hover:shadow-md hover:border-amber-200 dark:hover:border-amber-700">
+                      <div className="h-10 w-10 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center mb-3">
+                        <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                       </div>
-                    ) : (
-                      <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-                        {resumen.diasLicenciaAnuales ?? 0}
+                      <p className="text-xs font-medium text-amber-600/70 dark:text-amber-400/70 uppercase tracking-wider mb-1">
+                        Días Usados
                       </p>
-                    )}
-                  </div>
-                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 border border-amber-100 dark:border-amber-800">
-                    <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
-                      Días Usados
-                    </p>
-                    <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">
-                      {resumen.diasUsados}
-                    </p>
-                  </div>
-                  <div
-                    className={`rounded-lg p-4 border ${
-                      resumen.diasRestantes >= 0
-                        ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800'
-                        : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800'
-                    }`}
-                  >
-                    <p
-                      className={`text-sm font-medium ${
+                      <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">
+                        {resumen.diasUsados}
+                      </p>
+                    </div>
+
+                    {/* Días Restantes */}
+                    <div
+                      className={`relative rounded-xl p-5 border transition-all duration-200 hover:shadow-md ${
                         resumen.diasRestantes >= 0
-                          ? 'text-green-600 dark:text-green-400'
-                          : 'text-red-600 dark:text-red-400'
+                          ? 'bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10 border-emerald-100 dark:border-emerald-800/50 hover:border-emerald-200 dark:hover:border-emerald-700'
+                          : 'bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 border-red-100 dark:border-red-800/50 hover:border-red-200 dark:hover:border-red-700'
                       }`}
                     >
-                      Días Restantes
-                    </p>
-                    <p
-                      className={`text-3xl font-bold ${
+                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center mb-3 ${
                         resumen.diasRestantes >= 0
-                          ? 'text-green-700 dark:text-green-300'
-                          : 'text-red-700 dark:text-red-300'
-                      }`}
-                    >
-                      {resumen.diasRestantes}
-                    </p>
-                    {resumen.diasRestantes < 0 && (
-                      <p className="text-xs text-red-500 mt-1">
-                        Excedido en {Math.abs(resumen.diasRestantes)} día(s)
+                          ? 'bg-emerald-500/10 dark:bg-emerald-500/20'
+                          : 'bg-red-500/10 dark:bg-red-500/20'
+                      }`}>
+                        {resumen.diasRestantes >= 0 ? (
+                          <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                          <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        )}
+                      </div>
+                      <p
+                        className={`text-xs font-medium uppercase tracking-wider mb-1 ${
+                          resumen.diasRestantes >= 0
+                            ? 'text-emerald-600/70 dark:text-emerald-400/70'
+                            : 'text-red-600/70 dark:text-red-400/70'
+                        }`}
+                      >
+                        Días Restantes
                       </p>
-                    )}
+                      <p
+                        className={`text-3xl font-bold ${
+                          resumen.diasRestantes >= 0
+                            ? 'text-emerald-700 dark:text-emerald-300'
+                            : 'text-red-700 dark:text-red-300'
+                        }`}
+                      >
+                        {resumen.diasRestantes}
+                      </p>
+                      {resumen.diasRestantes < 0 && (
+                        <p className="text-xs text-red-500 dark:text-red-400 mt-1.5 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          Excedido en {Math.abs(resumen.diasRestantes)} día(s)
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
               ) : (
                 <p className="text-gray-500 dark:text-slate-400 text-center py-4">
                   No se pudo cargar el resumen
@@ -588,13 +663,16 @@ const PersonalLicencias = () => {
             exit={{ opacity: 0, height: 0 }}
             className="mb-6"
           >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg border-l-4 border-l-blue-600">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {editingId ? 'Editar Licencia' : 'Registrar Nueva Licencia'}
+            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden border-t-4 border-t-blue-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                    {editingId ? <Edit className="w-4 h-4 text-blue-600" /> : <Plus className="w-4 h-4 text-blue-600" />}
+                  </div>
+                  {editingId ? 'Editar Licencia' : 'Nueva Licencia'}
                 </CardTitle>
                 <CardDescription>
-                  Complete los datos de la licencia
+                  Complete los campos requeridos para {editingId ? 'actualizar' : 'registrar'} la licencia
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -803,14 +881,14 @@ const PersonalLicencias = () => {
                   </div>
 
                   {/* Botones */}
-                  <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                    <Button type="button" variant="outline" onClick={resetForm}>
+                  <div className="flex justify-end gap-3 pt-5 border-t border-slate-200 dark:border-slate-700">
+                    <Button type="button" variant="outline" onClick={resetForm} className="min-w-[100px]">
                       Cancelar
                     </Button>
                     <Button
                       type="submit"
                       disabled={saving}
-                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white min-w-[140px]"
+                      className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white min-w-[140px] shadow-md shadow-blue-500/20 hover:shadow-lg transition-all duration-200"
                     >
                       {saving ? (
                         <>
@@ -842,32 +920,45 @@ const PersonalLicencias = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="w-5 h-5 text-blue-600" />
-                Historial de Licencias — {anioFiltro}
-              </CardTitle>
-              <CardDescription>
-                {pagination.total} licencia(s) registrada(s) para el año{' '}
-                {anioFiltro}
-              </CardDescription>
+          <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-lg overflow-hidden">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    Historial de Licencias — {anioFiltro}
+                  </CardTitle>
+                  <CardDescription>
+                    {pagination.total} licencia(s) registrada(s)
+                  </CardDescription>
+                </div>
+                {licencias.length > 0 && (
+                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+                    {licencias.length} registro{licencias.length !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-0 pb-0">
               {licencias.length === 0 ? (
-                <div className="text-center py-12">
-                  <ClipboardList className="w-16 h-16 mx-auto text-gray-300 dark:text-slate-600 mb-4" />
-                  <p className="text-gray-500 dark:text-slate-400 text-lg">
-                    No hay licencias registradas para el año {anioFiltro}
+                <div className="text-center py-16 px-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 mb-4">
+                    <CalendarDays className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-base font-medium mb-1">
+                    Sin licencias registradas
+                  </p>
+                  <p className="text-slate-400 dark:text-slate-500 text-sm mb-5">
+                    No se encontraron licencias para el año {anioFiltro}
                   </p>
                   {hasPermission('create') && (
                     <Button
-                      className="mt-4"
                       variant="outline"
                       onClick={() => {
                         resetForm();
                         setShowForm(true);
                       }}
+                      className="border-dashed border-2 hover:border-blue-300 hover:bg-blue-50/50 dark:hover:border-blue-700 dark:hover:bg-blue-900/20"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Registrar primera licencia
@@ -875,123 +966,193 @@ const PersonalLicencias = () => {
                   )}
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-slate-50 dark:bg-slate-800/50">
-                        <TableHead className="font-semibold">Tipo</TableHead>
-                        <TableHead className="font-semibold">
-                          Fecha Salida
-                        </TableHead>
-                        <TableHead className="font-semibold">
-                          Fecha Regreso
-                        </TableHead>
-                        <TableHead className="font-semibold text-center">
-                          Año
-                        </TableHead>
-                        <TableHead className="font-semibold text-center">
-                          Días
-                        </TableHead>
-                        <TableHead className="font-semibold text-center">
-                          Días Restantes
-                        </TableHead>
-                        <TableHead className="font-semibold text-center">
-                          Estado
-                        </TableHead>
-                        {(hasPermission('update') ||
-                          hasPermission('delete')) && (
-                          <TableHead className="font-semibold text-center">
-                            Acciones
-                          </TableHead>
-                        )}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {licencias.map((licencia, index) => (
-                        <TableRow
-                          key={licencia.id}
-                          className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors"
-                        >
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getTipoBadgeClass(licencia.tipo)}`}
-                            >
-                              {getTipoLabel(licencia.tipo)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-sm text-slate-700 dark:text-slate-300">
-                            {formatDate(licencia.fechaInicio)}
-                          </TableCell>
-                          <TableCell className="text-sm text-slate-700 dark:text-slate-300">
-                            {formatDate(licencia.fechaFin)}
-                          </TableCell>
-                          <TableCell className="text-center font-medium text-slate-700 dark:text-slate-300">
-                            {licencia.anioLicencia}
-                          </TableCell>
-                          <TableCell className="text-center font-bold text-slate-900 dark:text-slate-100">
-                            {licencia.dias}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <span
-                              className={`font-bold ${
-                                licencia.diasRestantes >= 0
-                                  ? 'text-green-600 dark:text-green-400'
-                                  : 'text-red-600 dark:text-red-400'
-                              }`}
-                            >
-                              {licencia.diasRestantes}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge
-                              variant={
-                                licencia.estado === 'APROBADA'
-                                  ? 'success'
-                                  : licencia.estado === 'PENDIENTE'
-                                    ? 'warning'
-                                    : 'danger'
-                              }
-                            >
-                              {licencia.estado}
-                            </Badge>
-                          </TableCell>
-                          {(hasPermission('update') ||
-                            hasPermission('delete')) && (
-                            <TableCell className="text-center">
-                              <div className="flex items-center justify-center gap-1">
-                                {hasPermission('update') && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEditar(licencia)}
-                                    className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600"
-                                    title="Editar"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                )}
-                                {hasPermission('delete') && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => {
-                                      setDeletingId(licencia.id);
-                                      setShowDeleteDialog(true);
-                                    }}
-                                    className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600"
-                                    title="Eliminar"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
+                <>
+                  {/* Vista desktop: tabla */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-50/80 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Tipo</TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Período</TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Días</TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Restantes</TableHead>
+                          <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">Estado</TableHead>
+                          {(hasPermission('update') || hasPermission('delete')) && (
+                            <TableHead className="font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right pr-6">Acciones</TableHead>
                           )}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {licencias.map((licencia, index) => (
+                          <motion.tr
+                            key={licencia.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="group border-b border-slate-100 dark:border-slate-800/50 hover:bg-blue-50/40 dark:hover:bg-blue-900/10 transition-colors duration-150"
+                          >
+                            <TableCell className="py-3.5">
+                              <span
+                                className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getTipoBadgeClass(licencia.tipo)}`}
+                              >
+                                {getTipoLabel(licencia.tipo)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="py-3.5">
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                  {formatDate(licencia.fechaInicio)} → {formatDate(licencia.fechaFin)}
+                                </span>
+                                <span className="text-xs text-slate-400 dark:text-slate-500">
+                                  Año {licencia.anioLicencia}
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center py-3.5">
+                              <span className="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-sm font-bold text-slate-700 dark:text-slate-300">
+                                {licencia.dias}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center py-3.5">
+                              <span
+                                className={`inline-flex items-center justify-center h-8 min-w-[2rem] px-2 rounded-lg text-sm font-bold ${
+                                  licencia.diasRestantes >= 0
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                                    : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                }`}
+                              >
+                                {licencia.diasRestantes}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center py-3.5">
+                              <Badge
+                                variant={
+                                  licencia.estado === 'APROBADA'
+                                    ? 'success'
+                                    : licencia.estado === 'PENDIENTE'
+                                      ? 'warning'
+                                      : 'danger'
+                                }
+                              >
+                                {licencia.estado}
+                              </Badge>
+                            </TableCell>
+                            {(hasPermission('update') || hasPermission('delete')) && (
+                              <TableCell className="text-right pr-4 py-3.5">
+                                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                  {hasPermission('update') && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleEditar(licencia)}
+                                      className="h-8 w-8 p-0 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-400 hover:text-blue-600"
+                                      title="Editar licencia"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </Button>
+                                  )}
+                                  {hasPermission('delete') && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setDeletingId(licencia.id);
+                                        setShowDeleteDialog(true);
+                                      }}
+                                      className="h-8 w-8 p-0 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-600"
+                                      title="Eliminar licencia"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </TableCell>
+                            )}
+                          </motion.tr>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Vista mobile: tarjetas */}
+                  <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                    {licencias.map((licencia, index) => (
+                      <motion.div
+                        key={licencia.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="p-4 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border ${getTipoBadgeClass(licencia.tipo)}`}
+                          >
+                            {getTipoLabel(licencia.tipo)}
+                          </span>
+                          <Badge
+                            variant={
+                              licencia.estado === 'APROBADA'
+                                ? 'success'
+                                : licencia.estado === 'PENDIENTE'
+                                  ? 'warning'
+                                  : 'danger'
+                            }
+                          >
+                            {licencia.estado}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 text-sm mb-3">
+                          <div>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Período</p>
+                            <p className="font-medium text-slate-700 dark:text-slate-300 text-xs">
+                              {formatDate(licencia.fechaInicio)} — {formatDate(licencia.fechaFin)}
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Días</p>
+                            <p className="font-bold text-slate-900 dark:text-slate-100">{licencia.dias}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mb-0.5">Restantes</p>
+                            <p className={`font-bold ${
+                              licencia.diasRestantes >= 0
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-red-600 dark:text-red-400'
+                            }`}>{licencia.diasRestantes}</p>
+                          </div>
+                        </div>
+                        {(hasPermission('update') || hasPermission('delete')) && (
+                          <div className="flex items-center justify-end gap-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+                            {hasPermission('update') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditar(licencia)}
+                                className="h-8 text-xs text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                              >
+                                <Edit className="w-3.5 h-3.5 mr-1.5" /> Editar
+                              </Button>
+                            )}
+                            {hasPermission('delete') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setDeletingId(licencia.id);
+                                  setShowDeleteDialog(true);
+                                }}
+                                className="h-8 text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Eliminar
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -999,19 +1160,23 @@ const PersonalLicencias = () => {
 
         {/* Diálogo de confirmación de eliminación */}
         <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Confirmar Eliminación</DialogTitle>
-              <DialogDescription>
-                ¿Está seguro de que desea eliminar esta licencia? Esta acción no
-                se puede deshacer.
+              <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <DialogTitle className="text-center">Eliminar Licencia</DialogTitle>
+              <DialogDescription className="text-center">
+                Esta acción no se puede deshacer. La licencia será eliminada
+                permanentemente del registro.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
+            <DialogFooter className="flex gap-3 sm:justify-center pt-2">
               <Button
                 variant="outline"
                 onClick={() => setShowDeleteDialog(false)}
                 disabled={deleting}
+                className="flex-1 sm:flex-none"
               >
                 Cancelar
               </Button>
@@ -1019,8 +1184,9 @@ const PersonalLicencias = () => {
                 variant="destructive"
                 onClick={handleEliminar}
                 disabled={deleting}
+                className="flex-1 sm:flex-none"
               >
-                {deleting ? 'Eliminando...' : 'Eliminar'}
+                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
               </Button>
             </DialogFooter>
           </DialogContent>

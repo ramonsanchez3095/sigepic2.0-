@@ -1,26 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useDropzone } from 'react-dropzone';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
   Upload,
   X,
-  ArrowLeft,
+  ChevronLeft,
   User,
   Briefcase,
   FileText,
   Phone,
   Shield,
   Camera,
+  Check,
+  MapPin,
+  Car,
+  Hash,
+  Calendar,
+  AlertCircle,
+  Paperclip,
 } from 'lucide-react';
 import { personalService } from '../services/personal.service';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
 import {
   Card,
   CardContent,
@@ -239,532 +247,435 @@ const PersonalNew = () => {
   const jerarquiasAMostrar =
     tipoPersonal === 'SUPERIOR' ? jerarquiasSuperiores : jerarquiasSubalternas;
 
+  // Secciones del stepper
+  const sections = [
+    { id: 'foto', icon: Camera, label: 'Foto' },
+    { id: 'personal', icon: User, label: 'Personales' },
+    { id: 'laboral', icon: Briefcase, label: 'Laborales' },
+    { id: 'contacto', icon: Phone, label: 'Contacto' },
+    { id: 'armamento', icon: Shield, label: 'Armamento' },
+    { id: 'otros', icon: FileText, label: 'Otros' },
+    { id: 'archivos', icon: Paperclip, label: 'Archivos' },
+  ];
+  const sectionRefs = useRef({});
+  const [activeSection, setActiveSection] = useState('foto');
+
+  // Observer para detectar sección visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.dataset.section);
+          }
+        }
+      },
+      { rootMargin: '-120px 0px -60% 0px', threshold: 0.1 }
+    );
+    Object.values(sectionRefs.current).forEach(el => {
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSection = id => {
+    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Helper para select styling
+  const selectClass = (hasError) =>
+    `w-full h-10 px-3 py-2 rounded-md border text-sm bg-background ring-offset-background focus:outline-none focus:ring-2 focus:ring-police-cyan/40 focus:border-police-cyan transition-colors ${
+      hasError ? 'border-red-400 focus:ring-red-400/40' : 'border-input hover:border-slate-400'
+    }`;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50/30 to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 right-20 w-96 h-96 bg-police-cyan/10 dark:bg-police-cyan/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-20 left-20 w-96 h-96 bg-police-navy/10 dark:bg-police-cyan/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.4, 0.2, 0.4],
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-        />
+    <div className="min-h-screen bg-slate-50/80 dark:bg-slate-950">
+      {/* ── Sticky Header ── */}
+      <div className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {/* Top row */}
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 -ml-2"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Volver
+              </Button>
+              <div className="hidden sm:block w-px h-6 bg-slate-200 dark:bg-slate-700" />
+              <div className="hidden sm:flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                  <Plus className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-base font-bold text-slate-900 dark:text-white leading-none">
+                    Agregar Personal
+                  </h1>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Departamento D-2</p>
+                </div>
+              </div>
+            </div>
+            <Badge variant="info" className="text-xs">
+              <Hash className="w-3 h-3 mr-1" />
+              Nuevo registro
+            </Badge>
+          </div>
+
+          {/* Stepper */}
+          <div className="flex items-center gap-1 pb-3 overflow-x-auto scrollbar-hide -mx-1 px-1">
+            {sections.map((s, idx) => {
+              const Icon = s.icon;
+              const isActive = activeSection === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => scrollToSection(s.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-police-cyan/10 text-police-cyan dark:bg-police-cyan/20 dark:text-cyan-300 ring-1 ring-police-cyan/30'
+                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{s.label}</span>
+                  <span className="sm:hidden">{idx + 1}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 relative z-10">
-        {/* Header */}
-        <motion.div
-          className="mb-10"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/dashboard')}
-            className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:shadow-md transition-all text-slate-700 dark:text-slate-300"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver al Dashboard
-          </Button>
-
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
-            <div>
-              <motion.h1
-                className="text-5xl font-extrabold leading-tight bg-gradient-to-r from-police-navy via-police-navy-light to-police-cyan dark:from-white dark:via-blue-200 dark:to-cyan-400 bg-clip-text text-transparent mb-4"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                Agregar Personal
-              </motion.h1>
-              <motion.p
-                className="text-lg text-slate-600 dark:text-slate-400 font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Complete todos los campos requeridos para registrar nuevo
-                personal del Departamento D-2
-              </motion.p>
-            </div>
-
-            {/* Quick Stats */}
+      {/* ── Form Body ── */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 pb-32">
+        {/* Error banner */}
+        <AnimatePresence>
+          {error && (
             <motion.div
-              className="flex gap-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl"
             >
-              {/* <div className="px-4 py-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-2xl font-bold text-police-navy">
-                  {jerarquias.length}
-                </div>
-                <div className="text-xs text-slate-500 font-medium">
-                  Jerarquías
-                </div>
-              </div> */}
-              {/* <div className="px-4 py-3 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm">
-                <div className="text-2xl font-bold text-police-cyan">
-                  {secciones.length}
-                </div>
-                <div className="text-xs text-slate-500 font-medium">
-                  Secciones
-                </div>
-              </div> */}
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400">Error al registrar</p>
+                <p className="text-sm text-red-600 dark:text-red-400/80 mt-0.5">{error}</p>
+              </div>
+              <button type="button" onClick={() => setError('')} className="ml-auto text-red-400 hover:text-red-600">
+                <X className="w-4 h-4" />
+              </button>
             </motion.div>
-          </div>
-        </motion.div>
-
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-5 bg-red-50/90 dark:bg-red-900/20 backdrop-blur-sm border-l-4 border-red-500 rounded-xl text-red-700 dark:text-red-400 shadow-lg"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-white text-xs font-bold">!</span>
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold mb-1">Error al registrar</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Foto de Perfil */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+
+          {/* ═══ 1. Fotografía ═══ */}
+          <div ref={el => (sectionRefs.current.foto = el)} data-section="foto">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <Camera className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Fotografía</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Agregue una foto del personal (opcional)
-                    </CardDescription>
+                    <CardTitle className="text-base">Fotografía</CardTitle>
+                    <CardDescription className="text-xs">Foto del personal (opcional)</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  {/* Preview */}
-                  <div className="relative group">
-                    <div className="w-40 h-40 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 border-4 border-white shadow-xl overflow-hidden flex items-center justify-center">
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  {/* Preview circle */}
+                  <div className="relative flex-shrink-0">
+                    <div className="w-28 h-28 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 border-2 border-white dark:border-slate-600 shadow-lg overflow-hidden flex items-center justify-center">
                       {fotoPreview ? (
-                        <img
-                          src={fotoPreview}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={fotoPreview} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
-                        <User className="w-20 h-20 text-slate-400" />
+                        <User className="w-12 h-12 text-slate-300 dark:text-slate-500" />
                       )}
                     </div>
-                    <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-police-cyan rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-                      <Camera className="w-5 h-5 text-white" />
-                    </div>
+                    {foto && (
+                      <button
+                        type="button"
+                        onClick={() => { setFoto(null); setFotoPreview(null); }}
+                        className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
 
-                  {/* Upload */}
+                  {/* Upload zone */}
                   <div className="flex-1 w-full">
                     <div
                       {...getFotoRootProps()}
-                      className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-police-cyan hover:bg-police-cyan/5 transition-all duration-300 hover:shadow-lg"
+                      className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-police-cyan hover:bg-police-cyan/5 transition-all group"
                     >
                       <input {...getFotoInputProps()} />
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                          <Upload className="w-8 h-8 text-police-cyan" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Click para seleccionar o arrastre una foto
-                          </p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                            PNG, JPG • Máximo 5MB
-                          </p>
-                        </div>
-                      </div>
+                      <Upload className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2 group-hover:text-police-cyan transition-colors" />
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Click o arrastre una foto
+                      </p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">PNG, JPG — Máx 5MB</p>
                     </div>
                     {foto && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="mt-3 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
-                      >
-                        <span className="text-sm text-green-700 font-medium">
-                          ✓ Foto cargada: {foto.name}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setFoto(null);
-                            setFotoPreview(null);
-                          }}
-                          className="hover:bg-red-100 hover:text-red-700"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </motion.div>
+                      <div className="mt-2 flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                        <Check className="w-3.5 h-3.5" />
+                        <span className="font-medium truncate">{foto.name}</span>
+                      </div>
                     )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Datos Personales */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 2. Datos Personales ═══ */}
+          <div ref={el => (sectionRefs.current.personal = el)} data-section="personal">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Datos Personales</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Información personal básica del efectivo
-                    </CardDescription>
+                    <CardTitle className="text-base">Datos Personales</CardTitle>
+                    <CardDescription className="text-xs">Información personal básica del efectivo</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="apellidos">Apellidos *</Label>
-                  <Input
-                    id="apellidos"
-                    {...register('apellidos')}
-                    className={errors.apellidos ? 'border-red-500' : ''}
-                  />
-                  {errors.apellidos && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.apellidos.message}
-                    </p>
-                  )}
+              <CardContent className="space-y-4">
+                {/* Row: Apellidos, Nombres, DNI */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="apellidos" className="text-xs font-semibold">
+                      Apellidos <span className="text-red-400">*</span>
+                    </Label>
+                    <Input id="apellidos" {...register('apellidos')} className={errors.apellidos ? 'border-red-400' : ''} />
+                    {errors.apellidos && <p className="text-xs text-red-500">{errors.apellidos.message}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nombres" className="text-xs font-semibold">
+                      Nombres <span className="text-red-400">*</span>
+                    </Label>
+                    <Input id="nombres" {...register('nombres')} className={errors.nombres ? 'border-red-400' : ''} />
+                    {errors.nombres && <p className="text-xs text-red-500">{errors.nombres.message}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="dni" className="text-xs font-semibold">
+                      DNI / CI <span className="text-red-400">*</span>
+                    </Label>
+                    <Input id="dni" {...register('dni')} placeholder="12345678" className={errors.dni ? 'border-red-400' : ''} />
+                    {errors.dni && <p className="text-xs text-red-500">{errors.dni.message}</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="nombres">Nombres *</Label>
-                  <Input
-                    id="nombres"
-                    {...register('nombres')}
-                    className={errors.nombres ? 'border-red-500' : ''}
-                  />
-                  {errors.nombres && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.nombres.message}
-                    </p>
-                  )}
+                {/* Row: CUIL, Sexo, Fecha Nac */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="cuil" className="text-xs font-semibold">CUIL</Label>
+                    <Input id="cuil" {...register('cuil')} placeholder="20-12345678-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="sexo" className="text-xs font-semibold">
+                      Sexo <span className="text-red-400">*</span>
+                    </Label>
+                    <select id="sexo" {...register('sexo')} className={selectClass(false)}>
+                      <option value="M">Masculino</option>
+                      <option value="F">Femenino</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fechaNacimiento" className="text-xs font-semibold">
+                      Fecha de Nacimiento <span className="text-red-400">*</span>
+                    </Label>
+                    <Input id="fechaNacimiento" type="date" {...register('fechaNacimiento')} className={errors.fechaNacimiento ? 'border-red-400' : ''} />
+                    {errors.fechaNacimiento && <p className="text-xs text-red-500">{errors.fechaNacimiento.message}</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="dni">DNI / CI *</Label>
-                  <Input
-                    id="dni"
-                    {...register('dni')}
-                    placeholder="Ej: 12345678"
-                    className={errors.dni ? 'border-red-500' : ''}
-                  />
-                  {errors.dni && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.dni.message}
-                    </p>
-                  )}
+                {/* Row: Estado Civil, Profesión, Prontuario */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="estadoCivil" className="text-xs font-semibold">Estado Civil</Label>
+                    <select id="estadoCivil" {...register('estadoCivil')} className={selectClass(false)}>
+                      <option value="SOLTERO">Soltero/a</option>
+                      <option value="CASADO">Casado/a</option>
+                      <option value="DIVORCIADO">Divorciado/a</option>
+                      <option value="VIUDO">Viudo/a</option>
+                      <option value="CONCUBINO">Concubino/a</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="profesion" className="text-xs font-semibold">Profesión</Label>
+                    <Input id="profesion" {...register('profesion')} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="prontuario" className="text-xs font-semibold">Prontuario</Label>
+                    <Input id="prontuario" {...register('prontuario')} />
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="cuil">CUIL</Label>
-                  <Input
-                    id="cuil"
-                    {...register('cuil')}
-                    placeholder="Ej: 20-12345678-9"
-                  />
+                {/* Row: Grupo Sanguíneo, Nacionalidad */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="grupoSanguineo" className="text-xs font-semibold">Grupo Sanguíneo</Label>
+                    <select id="grupoSanguineo" {...register('grupoSanguineo')} className={selectClass(false)}>
+                      <option value="">Seleccionar...</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nacionalidad" className="text-xs font-semibold">Nacionalidad</Label>
+                    <Input id="nacionalidad" {...register('nacionalidad')} placeholder="Argentina" />
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="sexo">Sexo *</Label>
-                  <select
-                    id="sexo"
-                    {...register('sexo')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="M">Masculino</option>
-                    <option value="F">Femenino</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="fechaNacimiento">Fecha de Nacimiento *</Label>
-                  <Input
-                    id="fechaNacimiento"
-                    type="date"
-                    {...register('fechaNacimiento')}
-                    className={errors.fechaNacimiento ? 'border-red-500' : ''}
-                  />
-                  {errors.fechaNacimiento && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.fechaNacimiento.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="estadoCivil">Estado Civil</Label>
-                  <select
-                    id="estadoCivil"
-                    {...register('estadoCivil')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="SOLTERO">Soltero/a</option>
-                    <option value="CASADO">Casado/a</option>
-                    <option value="DIVORCIADO">Divorciado/a</option>
-                    <option value="VIUDO">Viudo/a</option>
-                    <option value="CONCUBINO">Concubino/a</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="profesion">Profesión</Label>
-                  <Input id="profesion" {...register('profesion')} />
-                </div>
-
-                <div>
-                  <Label htmlFor="prontuario">Prontuario</Label>
-                  <Input id="prontuario" {...register('prontuario')} />
-                </div>
-
-                <div>
-                  <Label htmlFor="grupoSanguineo">Grupo Sanguíneo</Label>
-                  <select
-                    id="grupoSanguineo"
-                    {...register('grupoSanguineo')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="nacionalidad">Nacionalidad</Label>
-                  <Input
-                    id="nacionalidad"
-                    {...register('nacionalidad')}
-                    placeholder="Argentina"
-                  />
-                </div>
-
-                <div className="lg:col-span-3">
-                  <Label htmlFor="domicilio">Domicilio</Label>
-                  <Input
-                    id="domicilio"
-                    {...register('domicilio')}
-                    placeholder="Calle, número, localidad"
-                  />
-                </div>
-
-                <div className="lg:col-span-3">
-                  <Label htmlFor="localidad">Localidad</Label>
-                  <Input
-                    id="localidad"
-                    {...register('localidad')}
-                    placeholder="Ciudad o localidad"
-                  />
+                {/* Domicilio + Localidad */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                  <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="font-medium uppercase tracking-wider">Dirección</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="domicilio" className="text-xs font-semibold">Domicilio</Label>
+                    <Input id="domicilio" {...register('domicilio')} placeholder="Calle, número, localidad" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="localidad" className="text-xs font-semibold">Localidad</Label>
+                    <Input id="localidad" {...register('localidad')} placeholder="Ciudad o localidad" />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Datos Laborales */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 3. Datos Laborales ═══ */}
+          <div ref={el => (sectionRefs.current.laboral = el)} data-section="laboral">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <Briefcase className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <Briefcase className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Datos Laborales</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Información del cargo y dependencia
-                    </CardDescription>
+                    <CardTitle className="text-base">Datos Laborales</CardTitle>
+                    <CardDescription className="text-xs">Información del cargo y dependencia</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="numeroAsignacion">N° de Asignación</Label>
-                  <Input
-                    id="numeroAsignacion"
-                    {...register('numeroAsignacion')}
-                    placeholder="Ej: A-12345"
-                  />
+              <CardContent className="space-y-4">
+                {/* Row: N° Asignación, Tipo Personal, Jerarquía */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="numeroAsignacion" className="text-xs font-semibold">N° de Asignación</Label>
+                    <Input id="numeroAsignacion" {...register('numeroAsignacion')} placeholder="A-12345" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tipoPersonal" className="text-xs font-semibold">
+                      Tipo de Personal <span className="text-red-400">*</span>
+                    </Label>
+                    <select id="tipoPersonal" {...register('tipoPersonal')} className={selectClass(false)}>
+                      <option value="SUPERIOR">Superior</option>
+                      <option value="SUBALTERNO">Subalterno</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="jerarquiaId" className="text-xs font-semibold">
+                      Jerarquía <span className="text-red-400">*</span>
+                    </Label>
+                    <select id="jerarquiaId" {...register('jerarquiaId')} className={selectClass(!!errors.jerarquiaId)}>
+                      <option value="">Seleccionar...</option>
+                      {jerarquiasAMostrar.map((jerarquia, index) => (
+                        <option key={index} value={jerarquia}>{jerarquia}</option>
+                      ))}
+                    </select>
+                    {errors.jerarquiaId && <p className="text-xs text-red-500">{errors.jerarquiaId.message}</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="tipoPersonal">Tipo de Personal *</Label>
-                  <select
-                    id="tipoPersonal"
-                    {...register('tipoPersonal')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="SUPERIOR">Superior</option>
-                    <option value="SUBALTERNO">Subalterno</option>
-                  </select>
+                {/* Row: N° Cargo, Sección, Función */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="numeroCargo" className="text-xs font-semibold">N° de Cargo</Label>
+                    <Input id="numeroCargo" {...register('numeroCargo')} placeholder="Número de cargo" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="seccionId" className="text-xs font-semibold">
+                      Sección <span className="text-red-400">*</span>
+                    </Label>
+                    <select id="seccionId" {...register('seccionId')} className={selectClass(!!errors.seccionId)}>
+                      <option value="">Seleccione una sección...</option>
+                      {seccionesDisponibles.map((seccion, index) => (
+                        <option key={index} value={seccion}>{seccion}</option>
+                      ))}
+                    </select>
+                    {errors.seccionId && <p className="text-xs text-red-500">{errors.seccionId.message}</p>}
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="funcionDepto" className="text-xs font-semibold">Función en Departamento</Label>
+                    <Input id="funcionDepto" {...register('funcionDepto')} />
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="jerarquiaId">Jerarquía *</Label>
-                  <select
-                    id="jerarquiaId"
-                    {...register('jerarquiaId')}
-                    className={`w-full px-3 py-2 border rounded-md bg-background ${
-                      errors.jerarquiaId ? 'border-red-500' : ''
-                    }`}
-                  >
-                    <option value="">Seleccionar...</option>
-                    {jerarquiasAMostrar.map((jerarquia, index) => (
-                      <option key={index} value={jerarquia}>
-                        {jerarquia}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.jerarquiaId && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.jerarquiaId.message}
-                    </p>
-                  )}
+                {/* Row: Horario, Jurisdicción, Regional */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="horarioLaboral" className="text-xs font-semibold">Horario Laboral</Label>
+                    <Input id="horarioLaboral" {...register('horarioLaboral')} placeholder="08:00 - 16:00" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="jurisdiccion" className="text-xs font-semibold">Jurisdicción</Label>
+                    <Input id="jurisdiccion" {...register('jurisdiccion')} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="regional" className="text-xs font-semibold">Regional</Label>
+                    <select id="regional" {...register('regional')} className={selectClass(false)}>
+                      <option value="">Seleccionar...</option>
+                      <option value="CAPITAL">Capital</option>
+                      <option value="NORTE">Norte</option>
+                      <option value="SUR">Sur</option>
+                      <option value="ESTE">Este</option>
+                      <option value="OESTE">Oeste</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="numeroCargo">N° de Cargo</Label>
-                  <Input
-                    id="numeroCargo"
-                    {...register('numeroCargo')}
-                    placeholder="Número de cargo"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="seccionId">Sección *</Label>
-                  <select
-                    id="seccionId"
-                    {...register('seccionId')}
-                    className={`w-full px-3 py-2 border rounded-md bg-background ${
-                      errors.seccionId ? 'border-red-500' : ''
-                    }`}
-                  >
-                    <option value="">Seleccione una sección...</option>
-                    {seccionesDisponibles.map((seccion, index) => (
-                      <option key={index} value={seccion}>
-                        {seccion}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.seccionId && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {errors.seccionId.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="funcionDepto">Función en Departamento</Label>
-                  <Input id="funcionDepto" {...register('funcionDepto')} />
-                </div>
-
-                <div>
-                  <Label htmlFor="horarioLaboral">Horario Laboral</Label>
-                  <Input
-                    id="horarioLaboral"
-                    {...register('horarioLaboral')}
-                    placeholder="Ej: 08:00 - 16:00"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="jurisdiccion">Jurisdicción</Label>
-                  <Input id="jurisdiccion" {...register('jurisdiccion')} />
-                </div>
-
-                <div>
-                  <Label htmlFor="regional">Regional</Label>
-                  <select
-                    id="regional"
-                    {...register('regional')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="CAPITAL">Capital</option>
-                    <option value="NORTE">Norte</option>
-                    <option value="SUR">Sur</option>
-                    <option value="ESTE">Este</option>
-                    <option value="OESTE">Oeste</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="subsidioSalud">Subsidio de Salud</Label>
-                  <Input id="subsidioSalud" {...register('subsidioSalud')} />
+                {/* Subsidio */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="subsidioSalud" className="text-xs font-semibold">Subsidio de Salud</Label>
+                    <Input id="subsidioSalud" {...register('subsidioSalud')} />
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Contacto */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 4. Información de Contacto ═══ */}
+          <div ref={el => (sectionRefs.current.contacto = el)} data-section="contacto">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                      <Phone className="w-5 h-5 text-white" />
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                      <Phone className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl">
-                        Información de Contacto
-                      </CardTitle>
+                      <CardTitle className="text-base">Información de Contacto</CardTitle>
                     </div>
                   </div>
                   <Button
@@ -772,442 +683,341 @@ const PersonalNew = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setContactosAdicionales([...contactosAdicionales, { tipo: 'celular', valor: '' }])}
-                    className="hover:bg-police-cyan/10 hover:border-police-cyan hover:text-police-cyan dark:hover:bg-police-cyan/20"
+                    className="text-xs h-8 hover:bg-police-cyan/10 hover:border-police-cyan hover:text-police-cyan"
                   >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Agregar Contacto
+                    <Plus className="w-3.5 h-3.5 mr-1" />
+                    Contacto
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6">
-                {/* Contacto Principal */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <Label htmlFor="celular">Celular Principal</Label>
-                    <Input
-                      id="celular"
-                      {...register('celular')}
-                      placeholder="Ej: +549 11 1234-5678"
-                    />
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="celular" className="text-xs font-semibold">Celular Principal</Label>
+                    <Input id="celular" {...register('celular')} placeholder="+549 11 1234-5678" />
                   </div>
-
-                  <div>
-                    <Label htmlFor="email">Email Principal</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      {...register('email')}
-                      placeholder="usuario@ejemplo.com"
-                      className={errors.email ? 'border-red-500' : ''}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-500 mt-1">
-                        {errors.email.message}
-                      </p>
-                    )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs font-semibold">Email Principal</Label>
+                    <Input id="email" type="email" {...register('email')} placeholder="usuario@ejemplo.com" className={errors.email ? 'border-red-400' : ''} />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
                   </div>
                 </div>
 
                 {/* Contactos Adicionales */}
-                {contactosAdicionales.length > 0 && (
-                  <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                    <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-                      Contactos Adicionales
-                    </p>
-                    {contactosAdicionales.map((contacto, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-3"
-                      >
-                        <select
-                          value={contacto.tipo}
-                          onChange={(e) => {
-                            const nuevosContactos = [...contactosAdicionales];
-                            nuevosContactos[index].tipo = e.target.value;
-                            setContactosAdicionales(nuevosContactos);
-                          }}
-                          className="w-32 px-3 py-2 border rounded-md bg-background text-sm"
+                <AnimatePresence>
+                  {contactosAdicionales.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2.5 pt-3 border-t border-slate-100 dark:border-slate-800"
+                    >
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        Contactos Adicionales
+                      </p>
+                      {contactosAdicionales.map((contacto, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          className="flex items-center gap-2"
                         >
-                          <option value="celular">Celular</option>
-                          <option value="telefono">Teléfono</option>
-                          <option value="email">Email</option>
-                          <option value="emergencia">Emergencia</option>
-                        </select>
-                        <Input
-                          value={contacto.valor}
-                          onChange={(e) => {
-                            const nuevosContactos = [...contactosAdicionales];
-                            nuevosContactos[index].valor = e.target.value;
-                            setContactosAdicionales(nuevosContactos);
-                          }}
-                          placeholder={contacto.tipo === 'email' ? 'correo@ejemplo.com' : 'Número de teléfono'}
-                          className="flex-1"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setContactosAdicionales(contactosAdicionales.filter((_, i) => i !== index));
-                          }}
-                          className="hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                          <select
+                            value={contacto.tipo}
+                            onChange={(e) => {
+                              const nuevosContactos = [...contactosAdicionales];
+                              nuevosContactos[index].tipo = e.target.value;
+                              setContactosAdicionales(nuevosContactos);
+                            }}
+                            className={`${selectClass(false)} w-32 flex-shrink-0`}
+                          >
+                            <option value="celular">Celular</option>
+                            <option value="telefono">Teléfono</option>
+                            <option value="email">Email</option>
+                            <option value="emergencia">Emergencia</option>
+                          </select>
+                          <Input
+                            value={contacto.valor}
+                            onChange={(e) => {
+                              const nuevosContactos = [...contactosAdicionales];
+                              nuevosContactos[index].valor = e.target.value;
+                              setContactosAdicionales(nuevosContactos);
+                            }}
+                            placeholder={contacto.tipo === 'email' ? 'correo@ejemplo.com' : 'Número de teléfono'}
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setContactosAdicionales(contactosAdicionales.filter((_, i) => i !== index))}
+                            className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 flex-shrink-0"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Armamento */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 5. Armamento ═══ */}
+          <div ref={el => (sectionRefs.current.armamento = el)} data-section="armamento">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">
-                      Armamento Asignado
-                    </CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Información sobre el armamento asignado (opcional)
-                    </CardDescription>
+                    <CardTitle className="text-base">Armamento Asignado</CardTitle>
+                    <CardDescription className="text-xs">Información sobre el armamento (opcional)</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="armaTipo">Tipo de Arma</Label>
-                  <Input
-                    id="armaTipo"
-                    {...register('armaTipo')}
-                    placeholder="Ej: Pistola 9mm"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="nroArma">N° de Arma</Label>
-                  <Input
-                    id="nroArma"
-                    {...register('nroArma')}
-                    placeholder="Número de serie"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="poseeChalecoAsignado">Chaleco Asignado</Label>
-                  <select
-                    id="poseeChalecoAsignado"
-                    {...register('poseeChalecoAsignado')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                    onChange={e => {
-                      setPoseeChalecoState(e.target.value === 'SI');
-                    }}
-                  >
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                  </select>
-                </div>
-
-                {poseeChalecoState && (
-                  <div>
-                    <Label htmlFor="nroSerieChalecoAsignado">
-                      N° de Serie Chaleco
-                    </Label>
-                    <Input
-                      id="nroSerieChalecoAsignado"
-                      {...register('nroSerieChalecoAsignado')}
-                      placeholder="Número de serie del chaleco"
-                    />
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="armaTipo" className="text-xs font-semibold">Tipo de Arma</Label>
+                    <Input id="armaTipo" {...register('armaTipo')} placeholder="Pistola 9mm" />
                   </div>
-                )}
+                  <div className="space-y-1.5">
+                    <Label htmlFor="nroArma" className="text-xs font-semibold">N° de Arma</Label>
+                    <Input id="nroArma" {...register('nroArma')} placeholder="Número de serie" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="poseeChalecoAsignado" className="text-xs font-semibold">Chaleco Asignado</Label>
+                    <select
+                      id="poseeChalecoAsignado"
+                      {...register('poseeChalecoAsignado')}
+                      className={selectClass(false)}
+                      onChange={e => setPoseeChalecoState(e.target.value === 'SI')}
+                    >
+                      <option value="NO">No</option>
+                      <option value="SI">Sí</option>
+                    </select>
+                  </div>
+                  {poseeChalecoState && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="space-y-1.5"
+                    >
+                      <Label htmlFor="nroSerieChalecoAsignado" className="text-xs font-semibold">N° de Serie Chaleco</Label>
+                      <Input id="nroSerieChalecoAsignado" {...register('nroSerieChalecoAsignado')} placeholder="Número de serie" />
+                    </motion.div>
+                  )}
+                </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Otros */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.85 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 6. Otros ═══ */}
+          <div ref={el => (sectionRefs.current.otros = el)} data-section="otros">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Otros</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Información adicional del personal
-                    </CardDescription>
+                    <CardTitle className="text-base">Otros</CardTitle>
+                    <CardDescription className="text-xs">Información adicional del personal</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="poseeCarnetManejo">
-                    Posee Carnet de Manejo
-                  </Label>
-                  <select
-                    id="poseeCarnetManejo"
-                    {...register('poseeCarnetManejo')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                    onChange={e => {
-                      setPoseeCarnet(e.target.value === 'SI');
-                    }}
-                  >
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                  </select>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="poseeCarnetManejo" className="text-xs font-semibold">Posee Carnet de Manejo</Label>
+                    <select
+                      id="poseeCarnetManejo"
+                      {...register('poseeCarnetManejo')}
+                      className={selectClass(false)}
+                      onChange={e => setPoseeCarnet(e.target.value === 'SI')}
+                    >
+                      <option value="NO">No</option>
+                      <option value="SI">Sí</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="poseeCredencialPolicial" className="text-xs font-semibold">Posee Credencial Policial</Label>
+                    <select id="poseeCredencialPolicial" {...register('poseeCredencialPolicial')} className={selectClass(false)}>
+                      <option value="NO">No</option>
+                      <option value="SI">Sí</option>
+                    </select>
+                  </div>
                 </div>
 
-                {poseeCarnet && (
-                  <div className="lg:col-span-2">
-                    <Label>Conduce</Label>
-                    <div className="flex gap-6 mt-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="conduceAutos"
-                          {...register('conduceAutos')}
-                          className="w-4 h-4 text-police-cyan border-gray-300 rounded focus:ring-police-cyan"
-                        />
-                        <Label
-                          htmlFor="conduceAutos"
-                          className="font-normal cursor-pointer"
-                        >
-                          Autos
-                        </Label>
+                {/* Conduce checkboxes */}
+                <AnimatePresence>
+                  {poseeCarnet && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700"
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <Car className="w-3.5 h-3.5 text-slate-400" />
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conduce</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="conduceMotos"
-                          {...register('conduceMotos')}
-                          className="w-4 h-4 text-police-cyan border-gray-300 rounded focus:ring-police-cyan"
-                        />
-                        <Label
-                          htmlFor="conduceMotos"
-                          className="font-normal cursor-pointer"
-                        >
-                          Motos
-                        </Label>
+                      <div className="flex flex-wrap gap-4">
+                        {[
+                          { id: 'conduceAutos', label: 'Autos', reg: 'conduceAutos' },
+                          { id: 'conduceMotos', label: 'Motos', reg: 'conduceMotos' },
+                          { id: 'conduceOtros', label: 'Otros', reg: 'conduceOtros' },
+                        ].map(item => (
+                          <label key={item.id} htmlFor={item.id} className="flex items-center gap-2 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              id={item.id}
+                              {...register(item.reg)}
+                              className="w-4 h-4 text-police-cyan border-slate-300 rounded focus:ring-police-cyan"
+                            />
+                            <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                              {item.label}
+                            </span>
+                          </label>
+                        ))}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="conduceOtros"
-                          {...register('conduceOtros')}
-                          className="w-4 h-4 text-police-cyan border-gray-300 rounded focus:ring-police-cyan"
-                        />
-                        <Label
-                          htmlFor="conduceOtros"
-                          className="font-normal cursor-pointer"
-                        >
-                          Otros
-                        </Label>
-                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Fechas de alta */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2 mb-3 text-xs text-slate-400 dark:text-slate-500">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="font-medium uppercase tracking-wider">Fechas de Alta</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="altaReparticion" className="text-xs font-semibold">Alta en la Repartición</Label>
+                      <Input id="altaReparticion" type="date" {...register('altaReparticion')} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="altaDepartamental" className="text-xs font-semibold">Alta Departamental</Label>
+                      <Input id="altaDepartamental" type="date" {...register('altaDepartamental')} />
                     </div>
                   </div>
-                )}
-
-                <div>
-                  <Label htmlFor="poseeCredencialPolicial">
-                    Posee Credencial Policial
-                  </Label>
-                  <select
-                    id="poseeCredencialPolicial"
-                    {...register('poseeCredencialPolicial')}
-                    className="w-full px-3 py-2 border rounded-md bg-background"
-                  >
-                    <option value="NO">No</option>
-                    <option value="SI">Sí</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="altaReparticion">
-                    Alta en la Repartición
-                  </Label>
-                  <Input
-                    id="altaReparticion"
-                    type="date"
-                    {...register('altaReparticion')}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="altaDepartamental">Alta Departamental</Label>
-                  <Input
-                    id="altaDepartamental"
-                    type="date"
-                    {...register('altaDepartamental')}
-                  />
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
-          {/* Archivos Adjuntos */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-          >
-            <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200 dark:border-slate-800 shadow-xl hover:shadow-2xl transition-all duration-300">
-              <CardHeader className="border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900">
+          {/* ═══ 7. Archivos Adjuntos ═══ */}
+          <div ref={el => (sectionRefs.current.archivos = el)} data-section="archivos">
+            <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
+              <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-police-navy to-police-cyan flex items-center justify-center">
+                    <Paperclip className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">Archivos Adjuntos</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      Agregue documentos relacionados (opcional)
-                    </CardDescription>
+                    <CardTitle className="text-base">Archivos Adjuntos</CardTitle>
+                    <CardDescription className="text-xs">Documentos relacionados (opcional)</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent>
                 <div
                   {...getArchivosRootProps()}
-                  className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-10 text-center cursor-pointer hover:border-police-cyan hover:bg-gradient-to-br hover:from-police-cyan/5 hover:to-transparent transition-all duration-300 hover:shadow-lg"
+                  className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 text-center cursor-pointer hover:border-police-cyan hover:bg-police-cyan/5 transition-all group"
                 >
                   <input {...getArchivosInputProps()} />
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                      <Upload className="w-10 h-10 text-police-cyan" />
-                    </div>
-                    <div>
-                      <p className="text-base font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                        Click para seleccionar o arrastre archivos aquí
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        PDF, PNG, JPG • Máximo 10MB cada uno
-                      </p>
-                    </div>
-                  </div>
+                  <Upload className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2 group-hover:text-police-cyan transition-colors" />
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    Click o arrastre archivos aquí
+                  </p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">PDF, PNG, JPG — Máx 10MB c/u</p>
                 </div>
 
                 {archivos.length > 0 && (
-                  <motion.div
-                    className="mt-6 space-y-3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-                        <FileText className="w-4 h-4 text-green-600" />
-                      </div>
-                      <p className="text-sm font-semibold text-slate-700">
-                        {archivos.length} archivo
-                        {archivos.length > 1 ? 's' : ''} seleccionado
-                        {archivos.length > 1 ? 's' : ''}
-                      </p>
+                  <div className="mt-4 space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <Paperclip className="w-3.5 h-3.5" />
+                      <span className="font-semibold">{archivos.length} archivo{archivos.length > 1 ? 's' : ''}</span>
                     </div>
                     {archivos.map((archivo, index) => (
-                      <motion.div
+                      <div
                         key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:shadow-md transition-shadow"
+                        className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 group/file hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-police-cyan/10 flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-police-cyan" />
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-md bg-police-cyan/10 flex items-center justify-center flex-shrink-0">
+                            <FileText className="w-4 h-4 text-police-cyan" />
                           </div>
-                          <div>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                              {archivo.name}
-                            </span>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                              {(archivo.size / 1024).toFixed(1)} KB
-                            </p>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{archivo.name}</p>
+                            <p className="text-xs text-slate-400">{(archivo.size / 1024).toFixed(1)} KB</p>
                           </div>
                         </div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          onClick={() =>
-                            setArchivos(prev =>
-                              prev.filter((_, i) => i !== index)
-                            )
-                          }
-                          className="hover:bg-red-100 hover:text-red-700"
+                          onClick={() => setArchivos(prev => prev.filter((_, i) => i !== index))}
+                          className="h-7 w-7 p-0 opacity-0 group-hover/file:opacity-100 hover:bg-red-100 hover:text-red-600 transition-all"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3.5 h-3.5" />
                         </Button>
-                      </motion.div>
+                      </div>
                     ))}
-                  </motion.div>
+                  </div>
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-
-          {/* Botones */}
-          <motion.div
-            className="sticky bottom-0 bg-gradient-to-t from-white via-white/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 pt-8 pb-6 mt-8 backdrop-blur-sm"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            <div className="flex gap-4 justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/dashboard')}
-                disabled={loading}
-                className="px-6 py-6 text-base font-semibold border-2 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:border-slate-700 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 transition-all"
-              >
-                <X className="w-5 h-5 mr-2" />
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-6 text-base font-semibold bg-gradient-to-r from-police-navy via-police-navy-light to-police-cyan hover:from-police-navy-dark hover:to-police-cyan border-2 border-police-cyan/30 shadow-lg hover:shadow-xl transition-all"
-              >
-                {loading ? (
-                  <>
-                    <motion.span
-                      className="inline-block mr-2"
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: 'linear',
-                      }}
-                    >
-                      ⏳
-                    </motion.span>
-                    Guardando...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-5 h-5 mr-2" />
-                    Registrar Personal
-                  </>
-                )}
-              </Button>
-            </div>
-          </motion.div>
+          </div>
         </form>
+      </div>
+
+      {/* ── Sticky Footer ── */}
+      <div className="fixed bottom-0 inset-x-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          <p className="text-xs text-slate-400 dark:text-slate-500 hidden sm:block">
+            Los campos marcados con <span className="text-red-400 font-bold">*</span> son obligatorios
+          </p>
+          <div className="flex gap-3 ml-auto">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/dashboard')}
+              disabled={loading}
+              className="h-10 px-5 text-sm font-medium"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              onClick={handleSubmit(onSubmit)}
+              className="h-10 px-6 text-sm font-semibold bg-gradient-to-r from-police-navy to-police-cyan hover:from-police-navy-dark hover:to-police-cyan shadow-md hover:shadow-lg transition-all"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <motion.span
+                    className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                  />
+                  Guardando...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Registrar Personal
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

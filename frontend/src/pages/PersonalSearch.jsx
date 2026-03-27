@@ -9,8 +9,6 @@ import {
   X,
   FileDown,
   Users,
-  Eye,
-  Edit,
   SortAsc,
   SortDesc,
   ChevronRight,
@@ -26,7 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
-import Loading from '../components/common/Loading';
+import { Badge } from '../components/ui/badge';
 
 const PersonalSearch = () => {
   const navigate = useNavigate();
@@ -212,6 +210,62 @@ const PersonalSearch = () => {
     setFiltros({ ...filtros, [e.target.name]: e.target.value });
   };
 
+  // --- Helpers de UI ---
+  const filterLabels = {
+    search: 'Búsqueda',
+    tipoPersonal: 'Tipo',
+    jerarquia: 'Jerarquía',
+    seccion: 'Sección',
+    estadoServicio: 'Estado',
+    jurisdiccion: 'Jurisdicción',
+    regional: 'Regional',
+    sexo: 'Sexo',
+    estadoCivil: 'Estado Civil',
+    grupoSanguineo: 'Grupo Sang.',
+  };
+
+  const activeFilterCount = Object.values(filtros).filter(v => v !== '').length;
+
+  const estadoSelectClass = estado => {
+    const base =
+      'inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1';
+    const colors = {
+      ACTIVO:
+        'bg-emerald-50 text-emerald-700 border-emerald-200 focus:ring-emerald-400 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800',
+      INACTIVO:
+        'bg-amber-50 text-amber-700 border-amber-200 focus:ring-amber-400 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
+      LICENCIA:
+        'bg-yellow-50 text-yellow-700 border-yellow-200 focus:ring-yellow-400 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800',
+      SUSPENSION:
+        'bg-orange-50 text-orange-700 border-orange-200 focus:ring-orange-400 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-800',
+      RETIRADO:
+        'bg-slate-100 text-slate-600 border-slate-200 focus:ring-slate-400 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
+      BAJA: 'bg-red-50 text-red-700 border-red-200 focus:ring-red-400 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800',
+    };
+    return `${base} ${colors[estado] || 'bg-slate-100 text-slate-600 border-slate-200'}`;
+  };
+
+  const selectClass =
+    'w-full h-9 px-3 text-sm border border-slate-200 dark:border-slate-700 rounded-md bg-white dark:bg-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-colors';
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+    if (start > 1) {
+      pages.push(1);
+      if (start > 2) pages.push('...');
+    }
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < totalPages) {
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   useEffect(() => {
     if (sortField || sortOrder) {
       handleBuscar(false);
@@ -219,155 +273,118 @@ const PersonalSearch = () => {
   }, [sortField, sortOrder]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950 p-6">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 right-20 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-20 left-20 w-96 h-96 bg-cyan-500/10 dark:bg-cyan-500/5 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-        />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Header compacto sticky */}
+      <div className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/dashboard')}
+              className="h-8 text-xs"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+              Dashboard
+            </Button>
+            <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+            <div>
+              <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Búsqueda Avanzada
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Consulta integral del padrón policial
+              </p>
+            </div>
+          </div>
+          {seleccionados.length > 0 && (
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              <Button
+                onClick={handleDescargarPlanillas}
+                disabled={loading}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {loading ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <FileDown className="w-4 h-4 mr-2" />
+                    Exportar ({seleccionados.length})
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          )}
+        </div>
       </div>
 
-      <div className="max-w-[1800px] mx-auto relative z-10">
-        {/* Header */}
-        <motion.div
-          className="mb-10"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/dashboard')}
-            className="mb-6 hover:bg-white/80 dark:hover:bg-slate-800/80 hover:shadow-md transition-all"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver al Dashboard
-          </Button>
-
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
-            <div>
-              <motion.h1
-                className="text-5xl font-extrabold leading-tight bg-gradient-to-r from-police-navy via-police-navy-light to-police-cyan dark:from-sky-300 dark:via-blue-400 dark:to-cyan-300 bg-clip-text text-transparent mb-4"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                Búsqueda Avanzada de Personal
-              </motion.h1>
-              <motion.p
-                className="text-lg text-slate-600 dark:text-slate-400 font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Sistema de consulta integral del padrón policial
-              </motion.p>
-            </div>
-
-            {seleccionados.length > 0 && (
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-              >
-                <Button
-                  onClick={handleDescargarPlanillas}
-                  disabled={loading}
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg"
-                >
-                  {loading ? (
-                    <>
-                      <span className="animate-spin mr-2">⏳</span>
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <FileDown className="w-5 h-5 mr-2" />
-                      Exportar ({seleccionados.length})
-                    </>
-                  )}
-                </Button>
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
         {/* Panel de Filtros */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ duration: 0.2 }}
         >
-          <Card className="mb-6 backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800">
+          <Card className="shadow-sm border-slate-200 dark:border-slate-800">
+            <CardHeader className="py-3 px-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <Filter className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+                    <Filter className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <div>
-                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                      Criterios de Búsqueda
-                    </CardTitle>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                      Filtre por múltiples parámetros simultáneamente
-                    </p>
-                  </div>
+                  <CardTitle className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    Criterios de Búsqueda
+                  </CardTitle>
+                  {activeFilterCount > 0 && (
+                    <Badge variant="secondary" className="text-xs font-medium">
+                      {activeFilterCount} activo{activeFilterCount > 1 ? 's' : ''}
+                    </Badge>
+                  )}
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                  className="h-7 text-xs text-slate-500 dark:text-slate-400"
                 >
-                  {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+                  {showFilters ? 'Ocultar' : 'Mostrar'}
                 </Button>
               </div>
             </CardHeader>
 
             {showFilters && (
-              <CardContent className="p-6">
+              <CardContent className="p-4 space-y-4">
                 {/* Búsqueda General */}
-                <div className="mb-6">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
-                    Búsqueda General
-                  </Label>
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                    <Input
-                      name="search"
-                      value={filtros.search}
-                      onChange={handleChange}
-                      placeholder="Buscar por apellido, nombre, DNI, legajo..."
-                      className="pl-12 h-12 text-base border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 focus:border-blue-500 focus:ring-blue-500"
-                      onKeyPress={e => e.key === 'Enter' && handleBuscar()}
-                    />
-                  </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    name="search"
+                    value={filtros.search}
+                    onChange={handleChange}
+                    placeholder="Buscar por apellido, nombre, DNI, legajo..."
+                    className="pl-10 h-10 text-sm"
+                    onKeyPress={e => e.key === 'Enter' && handleBuscar()}
+                  />
                 </div>
 
                 {/* Filtros Principales */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                       Tipo de Personal
                     </Label>
                     <select
                       name="tipoPersonal"
                       value={filtros.tipoPersonal}
                       onChange={handleChange}
-                      className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={selectClass}
                     >
                       <option value="">Todos</option>
                       <option value="SUPERIOR">Superior</option>
@@ -375,15 +392,15 @@ const PersonalSearch = () => {
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                       Jerarquía
                     </Label>
                     <select
                       name="jerarquia"
                       value={filtros.jerarquia}
                       onChange={handleChange}
-                      className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={selectClass}
                     >
                       <option value="">Todas</option>
                       <optgroup label="Superiores">
@@ -403,15 +420,15 @@ const PersonalSearch = () => {
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                       Sección
                     </Label>
                     <select
                       name="seccion"
                       value={filtros.seccion}
                       onChange={handleChange}
-                      className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={selectClass}
                     >
                       <option value="">Todas</option>
                       {secciones.map(s => (
@@ -422,15 +439,15 @@ const PersonalSearch = () => {
                     </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                       Estado de Servicio
                     </Label>
                     <select
                       name="estadoServicio"
                       value={filtros.estadoServicio}
                       onChange={handleChange}
-                      className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={selectClass}
                     >
                       <option value="">Todos</option>
                       <option value="ACTIVO">Activo</option>
@@ -444,14 +461,14 @@ const PersonalSearch = () => {
                 </div>
 
                 {/* Filtros Adicionales */}
-                <details className="group mb-4">
-                  <summary className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-3">
-                    <ChevronRight className="w-4 h-4 transition-transform group-open:rotate-90" />
+                <details className="group">
+                  <summary className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                    <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
                     Filtros Adicionales
                   </summary>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-3 pl-6">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mt-3 pl-5">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                         Jurisdicción
                       </Label>
                       <Input
@@ -459,19 +476,19 @@ const PersonalSearch = () => {
                         value={filtros.jurisdiccion}
                         onChange={handleChange}
                         placeholder="Ej: CRIA 1ra"
-                        className="border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        className="h-9 text-sm"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                         Regional
                       </Label>
                       <select
                         name="regional"
                         value={filtros.regional}
                         onChange={handleChange}
-                        className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={selectClass}
                       >
                         <option value="">Todas</option>
                         <option value="CAPITAL">Capital</option>
@@ -482,15 +499,15 @@ const PersonalSearch = () => {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                         Sexo
                       </Label>
                       <select
                         name="sexo"
                         value={filtros.sexo}
                         onChange={handleChange}
-                        className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={selectClass}
                       >
                         <option value="">Todos</option>
                         <option value="M">Masculino</option>
@@ -498,15 +515,15 @@ const PersonalSearch = () => {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                         Estado Civil
                       </Label>
                       <select
                         name="estadoCivil"
                         value={filtros.estadoCivil}
                         onChange={handleChange}
-                        className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={selectClass}
                       >
                         <option value="">Todos</option>
                         <option value="SOLTERO">Soltero/a</option>
@@ -517,15 +534,15 @@ const PersonalSearch = () => {
                       </select>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                         Grupo Sanguíneo
                       </Label>
                       <select
                         name="grupoSanguineo"
                         value={filtros.grupoSanguineo}
                         onChange={handleChange}
-                        className="w-full h-11 px-3 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={selectClass}
                       >
                         <option value="">Todos</option>
                         <option value="A+">A+</option>
@@ -541,45 +558,54 @@ const PersonalSearch = () => {
                   </div>
                 </details>
 
+                {/* Chips de filtros activos */}
+                {activeFilterCount > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {Object.entries(filtros)
+                      .filter(([, v]) => v !== '')
+                      .map(([key, value]) => (
+                        <Badge
+                          key={key}
+                          variant="secondary"
+                          className="gap-1 text-xs cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                          onClick={() => setFiltros(f => ({ ...f, [key]: '' }))}
+                        >
+                          {filterLabels[key]}: {value}
+                          <X className="w-3 h-3" />
+                        </Badge>
+                      ))}
+                  </div>
+                )}
+
                 {/* Acciones */}
-                <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
-                    {Object.values(filtros).filter(v => v !== '').length >
-                      0 && (
-                      <span>
-                        {Object.values(filtros).filter(v => v !== '').length}{' '}
-                        filtro(s) activo(s)
-                      </span>
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLimpiar}
+                    className="h-8 text-xs"
+                  >
+                    <X className="w-3.5 h-3.5 mr-1" />
+                    Limpiar
+                  </Button>
+                  <Button
+                    onClick={() => handleBuscar(true)}
+                    disabled={searching}
+                    size="sm"
+                    className="h-8 bg-blue-600 hover:bg-blue-700 text-white min-w-[100px]"
+                  >
+                    {searching ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1.5" />
+                        Buscando...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="w-3.5 h-3.5 mr-1.5" />
+                        Buscar
+                      </>
                     )}
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={handleLimpiar}
-                      className="border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300"
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Limpiar
-                    </Button>
-                    <Button
-                      onClick={() => handleBuscar(true)}
-                      disabled={searching}
-                      size="lg"
-                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white min-w-[140px]"
-                    >
-                      {searching ? (
-                        <>
-                          <span className="animate-spin mr-2">⏳</span>
-                          Buscando...
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-5 h-5 mr-2" />
-                          Buscar
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                  </Button>
                 </div>
               </CardContent>
             )}
@@ -589,24 +615,23 @@ const PersonalSearch = () => {
         {/* Resultados */}
         {resultados.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0.2 }}
           >
-            <Card className="backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-900 dark:to-slate-900 border-b border-slate-200 dark:border-slate-800">
+            <Card className="shadow-sm border-slate-200 dark:border-slate-800">
+              <CardHeader className="py-3 px-4 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                      <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-md">
+                      <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                        Resultados de Búsqueda
+                      <CardTitle className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        Resultados
                       </CardTitle>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                        {total} registro{total !== 1 ? 's' : ''} encontrado
-                        {total !== 1 ? 's' : ''}
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {total} registro{total !== 1 ? 's' : ''}
                         {seleccionados.length > 0 &&
                           ` · ${seleccionados.length} seleccionado${
                             seleccionados.length !== 1 ? 's' : ''
@@ -614,27 +639,25 @@ const PersonalSearch = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleSeleccionarTodos}
-                      className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
-                    >
-                      {seleccionados.length === resultados.length
-                        ? 'Deseleccionar todos'
-                        : 'Seleccionar todos'}
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSeleccionarTodos}
+                    className="h-7 text-xs text-slate-500 dark:text-slate-400"
+                  >
+                    {seleccionados.length === resultados.length
+                      ? 'Deseleccionar'
+                      : 'Seleccionar todos'}
+                  </Button>
                 </div>
               </CardHeader>
 
               <CardContent className="p-0">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <table className="w-full text-sm">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                       <tr>
-                        <th className="p-4 w-12 text-center">
+                        <th className="px-3 py-2.5 w-10 text-center">
                           <input
                             type="checkbox"
                             checked={
@@ -642,69 +665,69 @@ const PersonalSearch = () => {
                               resultados.length > 0
                             }
                             onChange={handleSeleccionarTodos}
-                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                            className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
-                        <th className="p-4 text-left">
+                        <th className="px-3 py-2.5 text-left">
                           <button
                             onClick={() => handleSort('apellidos')}
-                            className="flex items-center gap-2 font-semibold text-sm text-slate-700 hover:text-slate-900"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             Apellido y Nombre
                             {sortField === 'apellidos' &&
                               (sortOrder === 'asc' ? (
-                                <SortAsc className="w-4 h-4" />
+                                <SortAsc className="w-3.5 h-3.5" />
                               ) : (
-                                <SortDesc className="w-4 h-4" />
+                                <SortDesc className="w-3.5 h-3.5" />
                               ))}
                           </button>
                         </th>
-                        <th className="p-4 text-left">
+                        <th className="px-3 py-2.5 text-left">
                           <button
                             onClick={() => handleSort('dni')}
-                            className="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             Identificación
                             {sortField === 'dni' &&
                               (sortOrder === 'asc' ? (
-                                <SortAsc className="w-4 h-4" />
+                                <SortAsc className="w-3.5 h-3.5" />
                               ) : (
-                                <SortDesc className="w-4 h-4" />
+                                <SortDesc className="w-3.5 h-3.5" />
                               ))}
                           </button>
                         </th>
-                        <th className="p-4 text-left">
+                        <th className="px-3 py-2.5 text-left">
                           <button
                             onClick={() => handleSort('jerarquia')}
-                            className="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             Jerarquía
                             {sortField === 'jerarquia' &&
                               (sortOrder === 'asc' ? (
-                                <SortAsc className="w-4 h-4" />
+                                <SortAsc className="w-3.5 h-3.5" />
                               ) : (
-                                <SortDesc className="w-4 h-4" />
+                                <SortDesc className="w-3.5 h-3.5" />
                               ))}
                           </button>
                         </th>
-                        <th className="p-4 text-left font-semibold text-sm text-slate-700 dark:text-slate-300">
+                        <th className="px-3 py-2.5 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">
                           Sección
                         </th>
-                        <th className="p-4 text-center">
+                        <th className="px-3 py-2.5 text-center">
                           <button
                             onClick={() => handleSort('estadoServicio')}
-                            className="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                            className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
                           >
                             Estado
                             {sortField === 'estadoServicio' &&
                               (sortOrder === 'asc' ? (
-                                <SortAsc className="w-4 h-4" />
+                                <SortAsc className="w-3.5 h-3.5" />
                               ) : (
-                                <SortDesc className="w-4 h-4" />
+                                <SortDesc className="w-3.5 h-3.5" />
                               ))}
                           </button>
                         </th>
-                        <th className="p-4 text-center font-semibold text-sm text-slate-700 dark:text-slate-300">
+                        <th className="px-3 py-2.5 text-center text-xs font-semibold text-slate-600 dark:text-slate-300">
                           Acciones
                         </th>
                       </tr>
@@ -713,24 +736,24 @@ const PersonalSearch = () => {
                       {resultados.map((personal, index) => (
                         <motion.tr
                           key={personal.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.02 }}
-                          className="hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: index * 0.015 }}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                         >
-                          <td className="p-4 text-center">
+                          <td className="px-3 py-2.5 text-center">
                             <input
                               type="checkbox"
                               checked={seleccionados.includes(personal.id)}
                               onChange={() =>
                                 handleToggleSeleccion(personal.id)
                               }
-                              className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
+                              className="w-3.5 h-3.5 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500"
                             />
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 overflow-hidden flex-shrink-0 border-2 border-white dark:border-slate-700 shadow-sm">
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex-shrink-0 border border-slate-200 dark:border-slate-700">
                                 {personal.fotoUrl ? (
                                   <img
                                     src={personal.fotoUrl}
@@ -738,22 +761,22 @@ const PersonalSearch = () => {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-blue-600">
-                                    <Users className="w-5 h-5" />
+                                  <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                    <Users className="w-4 h-4" />
                                   </div>
                                 )}
                               </div>
-                              <div>
-                                <div className="font-bold text-slate-900 dark:text-slate-100">
+                              <div className="min-w-0">
+                                <div className="font-semibold text-slate-900 dark:text-slate-100 truncate text-sm">
                                   {personal.apellidos}, {personal.nombres}
                                 </div>
-                                <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-300 font-medium">
+                                <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                                  <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-[10px] font-medium text-slate-600 dark:text-slate-400">
                                     {personal.tipoPersonal}
                                   </span>
                                   {personal.sexo && (
                                     <span className="text-slate-400 dark:text-slate-500">
-                                      •{' '}
+                                      ·{' '}
                                       {personal.sexo === 'M'
                                         ? 'Masculino'
                                         : 'Femenino'}
@@ -763,70 +786,61 @@ const PersonalSearch = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                  DNI:
+                          <td className="px-3 py-2.5">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase">
+                                  DNI
                                 </span>
-                                <span className="font-semibold text-slate-900 dark:text-slate-200">
+                                <span className="font-semibold text-slate-900 dark:text-slate-200 text-xs">
                                   {personal.dni}
                                 </span>
                               </div>
                               {personal.numeroAsignacion && (
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                                    Leg:
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase">
+                                    Leg
                                   </span>
-                                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                                  <span className="text-xs text-slate-600 dark:text-slate-300">
                                     {personal.numeroAsignacion}
                                   </span>
                                 </div>
                               )}
                             </div>
                           </td>
-                          <td className="p-4">
-                            <div className="space-y-1">
-                              <div className="font-semibold text-slate-900 dark:text-slate-200">
-                                {personal.jerarquia || '-'}
-                              </div>
-                              {personal.cargo && (
-                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                  {personal.cargo}
-                                </div>
-                              )}
+                          <td className="px-3 py-2.5">
+                            <div className="font-medium text-slate-900 dark:text-slate-200 text-xs">
+                              {personal.jerarquia || '-'}
                             </div>
+                            {personal.cargo && (
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                {personal.cargo}
+                              </div>
+                            )}
                           </td>
-                          <td className="p-4">
-                            <div className="text-sm text-slate-700 dark:text-slate-300">
+                          <td className="px-3 py-2.5">
+                            <div className="text-xs text-slate-700 dark:text-slate-300">
                               {personal.seccion || '-'}
                             </div>
                             {personal.jurisdiccion && (
-                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 {personal.jurisdiccion}
                               </div>
                             )}
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="px-3 py-2.5 text-center">
                             <select
                               value={personal.estadoServicio || ''}
-                              onChange={e => handleEstadoChange(personal.id, e.target.value)}
+                              onChange={e =>
+                                handleEstadoChange(
+                                  personal.id,
+                                  e.target.value
+                                )
+                              }
                               onClick={e => e.stopPropagation()}
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                                personal.estadoServicio === 'ACTIVO'
-                                  ? 'bg-green-100 text-green-700 border-green-200 focus:ring-green-400 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
-                                  : personal.estadoServicio === 'INACTIVO'
-                                    ? 'bg-amber-100 text-amber-700 border-amber-200 focus:ring-amber-400 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800'
-                                    : personal.estadoServicio === 'LICENCIA'
-                                      ? 'bg-yellow-100 text-yellow-700 border-yellow-200 focus:ring-yellow-400 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
-                                      : personal.estadoServicio === 'SUSPENSION'
-                                        ? 'bg-orange-100 text-orange-700 border-orange-200 focus:ring-orange-400 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800'
-                                        : personal.estadoServicio === 'RETIRADO'
-                                          ? 'bg-slate-100 text-slate-600 border-slate-300 focus:ring-slate-400 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-600'
-                                          : personal.estadoServicio === 'BAJA'
-                                            ? 'bg-red-100 text-red-700 border-red-200 focus:ring-red-400 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
-                                            : 'bg-slate-100 text-slate-600 border-slate-200'
-                              }`}
+                              className={estadoSelectClass(
+                                personal.estadoServicio
+                              )}
                             >
                               <option value="ACTIVO">ACTIVO</option>
                               <option value="INACTIVO">INACTIVO</option>
@@ -836,8 +850,8 @@ const PersonalSearch = () => {
                               <option value="BAJA">BAJA</option>
                             </select>
                           </td>
-                          <td className="p-4">
-                            <div className="flex items-center justify-center gap-2">
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center justify-center gap-1">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -857,10 +871,10 @@ const PersonalSearch = () => {
                                     );
                                   }
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400"
+                                className="h-7 w-7 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600"
                                 title="Descargar Adjunto"
                               >
-                                <Download className="w-4 h-4" />
+                                <Download className="w-3.5 h-3.5" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -906,10 +920,10 @@ const PersonalSearch = () => {
                                     alert('Error al generar la planilla');
                                   }
                                 }}
-                                className="h-8 w-8 p-0 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-600 dark:hover:text-green-400"
+                                className="h-7 w-7 p-0 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:text-emerald-600"
                                 title="Generar Planilla"
                               >
-                                <FileDown className="w-4 h-4" />
+                                <FileDown className="w-3.5 h-3.5" />
                               </Button>
                               <Button
                                 variant="ghost"
@@ -917,10 +931,10 @@ const PersonalSearch = () => {
                                 onClick={() =>
                                   navigate(`/personal/${personal.id}/licencias`)
                                 }
-                                className="h-8 w-8 p-0 hover:bg-purple-100 dark:hover:bg-purple-900/30 hover:text-purple-600 dark:hover:text-purple-400"
+                                className="h-7 w-7 p-0 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:text-purple-600"
                                 title="Licencias"
                               >
-                                <ClipboardList className="w-4 h-4" />
+                                <ClipboardList className="w-3.5 h-3.5" />
                               </Button>
                             </div>
                           </td>
@@ -930,13 +944,13 @@ const PersonalSearch = () => {
                   </table>
                 </div>
 
-                {/* Paginación */}
+                {/* Paginación numerada */}
                 {totalPages > 1 && (
-                  <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <div className="text-sm text-slate-600 dark:text-slate-400">
-                      Página {page} de {totalPages}
-                    </div>
-                    <div className="flex gap-2">
+                  <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Página {page} de {totalPages} · {total} registros
+                    </p>
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="outline"
                         size="sm"
@@ -945,10 +959,37 @@ const PersonalSearch = () => {
                           handleBuscar(false);
                         }}
                         disabled={page === 1}
-                        className="border-slate-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="h-7 w-7 p-0 text-xs"
                       >
-                        Anterior
+                        ‹
                       </Button>
+                      {getPageNumbers().map((p, i) =>
+                        p === '...' ? (
+                          <span
+                            key={`dots-${i}`}
+                            className="px-1 text-xs text-slate-400"
+                          >
+                            …
+                          </span>
+                        ) : (
+                          <Button
+                            key={p}
+                            variant={page === p ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                              setPage(p);
+                              handleBuscar(false);
+                            }}
+                            className={`h-7 w-7 p-0 text-xs ${
+                              page === p
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : ''
+                            }`}
+                          >
+                            {p}
+                          </Button>
+                        )
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -957,9 +998,9 @@ const PersonalSearch = () => {
                           handleBuscar(false);
                         }}
                         disabled={page === totalPages}
-                        className="border-slate-300 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="h-7 w-7 p-0 text-xs"
                       >
-                        Siguiente
+                        ›
                       </Button>
                     </div>
                   </div>
@@ -972,26 +1013,30 @@ const PersonalSearch = () => {
         {/* Estado vacío */}
         {resultados.length === 0 && !searching && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-center py-20 backdrop-blur-sm bg-white/60 dark:bg-slate-900/60 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15 }}
+            className="text-center py-16 border border-dashed border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900"
           >
-            <div className="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <Search className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
+              <Search className="w-7 h-7 text-slate-400 dark:text-slate-500" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-              Inicie una búsqueda
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">
+              {Object.values(filtros).some(v => v !== '')
+                ? 'Sin resultados'
+                : 'Inicie una búsqueda'}
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              {filtros.search || Object.values(filtros).some(v => v !== '')
-                ? 'No se encontraron resultados con los criterios especificados.'
-                : 'Utilice los filtros de búsqueda para encontrar personal en el sistema.'}
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+              {Object.values(filtros).some(v => v !== '')
+                ? 'No se encontraron registros con los criterios especificados.'
+                : 'Utilice los filtros para buscar personal en el sistema.'}
             </p>
             {Object.values(filtros).some(v => v !== '') && (
               <Button
+                variant="outline"
+                size="sm"
                 onClick={handleLimpiar}
-                className="mt-6 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white"
+                className="mt-4 h-8 text-xs"
               >
                 Limpiar filtros
               </Button>
@@ -1000,10 +1045,10 @@ const PersonalSearch = () => {
         )}
 
         {searching && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
-              <p className="text-lg font-medium text-slate-700 dark:text-slate-300">
+              <div className="w-10 h-10 border-[3px] border-slate-200 dark:border-slate-700 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Buscando personal...
               </p>
             </div>
