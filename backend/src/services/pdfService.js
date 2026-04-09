@@ -7,6 +7,7 @@ const { es } = require('date-fns/locale');
 class PDFService {
   constructor() {
     this.reportsDir = path.join(__dirname, '../../uploads/reportes');
+    this.escudoPath = path.join(__dirname, '../assets/escudo_dic.png');
     this.ensureDirectoryExists();
   }
 
@@ -351,23 +352,37 @@ class PDFService {
           if (index > 0) doc.addPage();
 
           // --- ENCABEZADO ---
-          // Nota: Como no tengo los escudos exactos, usaré espacios o texto.
-          // Si tuvieras los logos en assets, se cargarían aquí.
-          
+          const leftMarginHeader = 40;
+          const escudoWidth = 75;
+          const escudoHeight = 90;
+          const escudoX = leftMarginHeader;
+          const escudoY = doc.y;
+
+          // Insertar escudo en el extremo izquierdo si el archivo existe
+          if (fs.existsSync(this.escudoPath)) {
+            doc.image(this.escudoPath, escudoX, escudoY, {
+              fit: [escudoWidth, escudoHeight],
+            });
+          }
+
+          // Texto del encabezado centrado en toda la página
+          const textY = escudoY + 10;
+
           doc
             .fontSize(14)
             .font('Helvetica-Bold')
-            .text('POLICÍA DE TUCUMÁN', { align: 'center' })
+            .text('POLICÍA DE TUCUMÁN', 0, textY, { width: doc.page.width, align: 'center' })
             .fontSize(12)
-            .text('DEPARTAMENTO INTELIGENCIA CRIMINAL', { align: 'center' })
-            .text('SECCION CENTRAL', { align: 'center' })
-            .moveDown(1.5);
+            .text('DEPARTAMENTO INTELIGENCIA CRIMINAL', 0, doc.y, { width: doc.page.width, align: 'center' })
+            .text('SECCION CENTRAL', 0, doc.y, { width: doc.page.width, align: 'center' })
+            .moveDown(0.5);
 
           doc
             .fontSize(12)
-            .text('FICHA DE DATOS DEL EMPLEADO POLICIAL', { align: 'center', underline: true });
-            
-          doc.moveDown(1);
+            .text('FICHA DE DATOS DEL EMPLEADO POLICIAL', 0, doc.y, { width: doc.page.width, align: 'center', underline: true });
+
+          // Mover Y debajo de lo que sea más alto: el escudo o el texto
+          doc.y = Math.max(escudoY + escudoHeight, doc.y) + 15;
 
           // --- RECUADRO FOTO ---
           const photoX = (doc.page.width - 120) / 2; // Centrado
